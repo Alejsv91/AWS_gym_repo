@@ -6,9 +6,12 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-
   backend:
     build: ./backend
+    volumes:
+      - ./backend:/app   # Monta tu código local dentro del contenedor
     ports:
       - "8000:8000"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
 

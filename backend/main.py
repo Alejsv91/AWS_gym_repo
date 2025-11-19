@@ -1,6 +1,10 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
 import psycopg2
 import os
+
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -13,7 +17,6 @@ def get_connection():
         port=os.getenv("DB_PORT")
     )
     
-
 @app.get("/")
 def read_root():
     return {"message": "Hello from FastAPI"}
@@ -33,16 +36,4 @@ def get_roles():
         ]
     except Exception as e:
         return {"error": str(e)}
-
-@app.get("/health")
-def health_check():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT 1;")
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-        return {"status": "ok", "db_response": result[0]}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+    
