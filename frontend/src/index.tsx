@@ -1,19 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// index.js
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { AuthProvider } from "react-oidc-context";
+
+const cognitoAuthConfig = {
+  authority: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+  client_id: process.env.REACT_APP_COGNITO_CLIENT_ID,
+  redirect_uri: "https://d84l1y8p4kdic.cloudfront.net",
+  response_type: "code",
+  scope: "email openid phone",
+};
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  document.getElementById("root")!   // 👈 asegura que no es null
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// wrap the application with AuthProvider
+root.render(
+  <React.StrictMode>
+    <AuthProvider {...cognitoAuthConfig}>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>
+);
