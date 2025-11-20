@@ -7,7 +7,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
+import LandingPage from "./pages/LandingPages";
 import Navbar from "./components/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
