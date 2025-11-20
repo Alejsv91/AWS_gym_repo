@@ -1,8 +1,7 @@
 // App.js
-
 import { useAuth } from "react-oidc-context";
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Route,
   Routes,
   Navigate,
@@ -11,12 +10,8 @@ import LandingPage from "./pages/LandingPages";
 import Navbar from "./components/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-
 function App() {
   const auth = useAuth();
-
-  console.log("Client ID:", process.env.REACT_APP_COGNITO_CLIENT_ID);
-  console.log("User Pool ID:", process.env.REACT_APP_COGNITO_USER_POOL_ID);
 
   const signOutRedirect = () => {
     const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
@@ -35,17 +30,21 @@ function App() {
     return <div>Encountering error... {auth.error.message}</div>;
   }
 
-  if (auth.isAuthenticated) {
-    return (
-
-      <><Navbar /><Router>
-        <Routes>
-          {auth.isAuthenticated ? (
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        {auth.isAuthenticated ? (
+          <>
             <Route path="/landing" element={<LandingPage />} />
-          ) : (
-            <Route
-              path="*"
-              element={<div className="container mt-5">
+            {/* Redirect to landing page after login */}
+            <Route path="*" element={<Navigate to="/landing" />} />
+          </>
+        ) : (
+          <Route
+            path="*"
+            element={
+              <div className="container mt-5">
                 <h1>Please log in</h1>
                 <button
                   className="btn btn-primary"
@@ -53,23 +52,12 @@ function App() {
                 >
                   Login
                 </button>
-              </div>} />
-          )}
-          {/* Redirect to landing page after login */}
-          {auth.isAuthenticated && (
-
-            <Route path="*" element={<Navigate to="/landing" />} />
-          )}
-        </Routes>
-      </Router></>
-    );
-  }
-
-  return (
-    <div>
-      <button onClick={() => auth.signinRedirect()}>Sign in</button>
-      <button onClick={() => signOutRedirect()}>Sign out</button>
-    </div>
+              </div>
+            }
+          />
+        )}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
