@@ -9,6 +9,8 @@ import {
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Navbar from "./components/Navbar";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 function App() {
   const auth = useAuth();
