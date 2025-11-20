@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { ROUTES } from "../constants/Routes";
 
 const Navbar: React.FC = () => {
   return (
@@ -26,16 +27,13 @@ const Navbar: React.FC = () => {
         {/* Links */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/dashboard">
-                Dashboard
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/users">
-                Usuarios
-              </Link>
-            </li>
+            {ROUTES.filter(r => r.showInNav).map((route)=>(
+                <li className="nav-item" key={route.path}>
+                    <Link className="nav-link" to={route.path}>
+                    {route.label}
+                    </Link>
+                </li>                            
+            ))}
             <li className="nav-item">
               <Link className="nav-link" to="/settings">
                 Configuración
