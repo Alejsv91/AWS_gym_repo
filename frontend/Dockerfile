@@ -1,5 +1,7 @@
-FROM node:18-alpine
+# Usa una imagen base ligera de Node.js
+FROM node:16-alpine AS build
 
+# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
 # Copia solo package.json y package-lock.json primero
@@ -18,4 +20,6 @@ RUN npm run build
 RUN npm install -g serve
 
 EXPOSE 3000
-CMD ["serve", "-s", "build", "-l", "3000"]
+
+# Comando para iniciar Nginx
+CMD ["nginx", "-g", "daemon off;"]
