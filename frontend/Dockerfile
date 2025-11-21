@@ -4,25 +4,21 @@ FROM node:16-alpine AS build
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia solo los archivos necesarios para instalar dependencias
+# Copia solo package.json y package-lock.json primero
 COPY package*.json ./
 
-# Instala las dependencias
+# Instala dependencias (cachea esta capa si no cambian)
 RUN npm install --legacy-peer-deps
 
-# Copia el resto del código fuente
+# Copia el resto del código
 COPY . .
 
-# Construye la aplicación para producción
+# Construye la app
 RUN npm run build
 
-# Usa una imagen ligera para servir la aplicación
-FROM nginx:stable-alpine
+# Instala serve para producción
+RUN npm install -g serve
 
-# Copia los archivos de construcción desde la etapa anterior
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expone el puerto 3000
 EXPOSE 3000
 
 # Comando para iniciar Nginx
