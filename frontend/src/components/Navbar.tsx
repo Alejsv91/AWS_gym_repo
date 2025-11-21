@@ -35,11 +35,6 @@ const Navbar: React.FC = () => {
                 </li>                            
             ))}
             <li className="nav-item">
-              <Link className="nav-link" to="/settings">
-                Configuración
-              </Link>
-            </li>
-            <li className="nav-item">
               <Link className="nav-link" to="/logout">
                 Logout
               </Link>
