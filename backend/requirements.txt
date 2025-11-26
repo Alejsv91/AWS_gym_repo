@@ -5,3 +5,4 @@ PyJWT
 requests
 python-jose[cryptography]
 boto3
+python-dotenv
