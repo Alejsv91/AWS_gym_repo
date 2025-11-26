@@ -1,29 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import HTTPBearer
+from core.auth import verify_token
 from dotenv import load_dotenv
-from fastapi.security import OAuth2PasswordBearer
 import psycopg2
 import os
-import jwt
-import requests
-
 
 load_dotenv()
 app = FastAPI()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-COGNITO_POOL_ID = os.getenv("COGNITO_POOL_ID")
-COGNITO_REGION = os.getenv("COGNITO_REGION")
-COGNITO_KEYS_URL = f"https://cognito-idp.{COGNITO_REGION}.amazonaws.com/{COGNITO_POOL_ID}/.well-known/jwks.json"
-COGNITO_CLIENT_ID = os.getenv("COGNITO_CLIENT_ID")
-
-jwks = requests.get(COGNITO_KEYS_URL).json()
-
-def verify_token(token: str):
-    try: 
-        decode = jwt.decode(toke, jwks, algorithms=['RS256'], audience=COGNITO_CLIENT_ID)
-        return decode
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid token")
+security = HTTPBearer()
 
 def get_connection():
     return psycopg2.connect(
@@ -33,15 +17,22 @@ def get_connection():
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT")
     )
-    
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI"}
+
+def get_current_user(credentials=Depends(security)):
+    token = credentials.credentials
+    try:
+        payload = verify_token(token)
+        return payload
+    except Exception:
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+@app.get("/secure-data")
+def secure_data(user=Depends(get_current_user)):
+    return {"message": "Acceso autorizado", "user": user}
 
 @app.get("/roles")
-def get_roles(token: str = Depends(oauth2_scheme)):
+def get_roles():
     try: 
-        payload = verify_token(token)
         conn = get_connection()
         cur = conn.cursor()
         cur.execute("SELECT * FROM roles;")
@@ -54,10 +45,5 @@ def get_roles(token: str = Depends(oauth2_scheme)):
         ]
     except Exception as e:
         return {"error": str(e)}
-    
-@app.get("/protected")
-def protected_route(token: str = Depends(oauth2_scheme)):
-    payload = verify_token(token)
-    return {"message": "You are authorized", "user": payload} 
 
     
