@@ -1,39 +1,9 @@
-from fastapi import FastAPI
-from dotenv import load_dotenv
-import psycopg2
-import os
-
-
-load_dotenv()
+from fastapi import FastAPI, Depends
+from fastapi.security import HTTPBearer
+from routers import roles
+from core.auth import get_current_user
 
 app = FastAPI()
+security = HTTPBearer()
 
-def get_connection():
-    return psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT")
-    )
-    
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI"}
-
-@app.get("/roles")
-def get_roles():
-    try: 
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM roles;")
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [
-            {"id": r[0], "name": r[1], "description": r[2]}
-            for r in rows
-        ]
-    except Exception as e:
-        return {"error": str(e)}
-    
+app.include_router(roles.router)
