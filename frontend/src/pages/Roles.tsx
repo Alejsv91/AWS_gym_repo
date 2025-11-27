@@ -1,6 +1,12 @@
+import RolesTable from "../components/role/RolesTables";
+
 const Roles: React.FC = () => {
-    return (<>
-        This is the role page</>)
+
+  return (
+    <div>
+      <RolesTable/>
+    </div>
+  );
 };
 
 export default Roles;
