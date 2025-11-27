@@ -1,15 +1,25 @@
 // src/services/roleService.ts
 import { useApi } from "./api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface Role {
+  id: number;
+  name: string;
+  description: string;
+}
 
 export function useRoles() {
   const api = useApi();
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
 
-  const fetchRoles = async () => {
-    const { data } = await api.get("/roles/");
-    setRoles(data);
-  };
+  useEffect(() => {
+    const fetchRoles = async () => {
+      const { data } = await api.get("/roles/");
+      setRoles(data);
+    };
+    fetchRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return { roles, fetchRoles };
+  return roles;
 }
