@@ -48,4 +48,4 @@ def get_current_user(credentials=Depends(security)):
         payload = verify_token(token)
         return payload
     except Exception:
-        raise HTTPException(status_code=401, detail="Token inválido")
+        raise HTTPException(status_code=401, detail="invalid token")
