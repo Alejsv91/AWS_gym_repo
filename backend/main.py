@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.security import HTTPBearer
-from routers import roles
+from routers import roles, users
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -17,3 +17,4 @@ app.add_middleware(
 )
 
 app.include_router(roles.router)
+app.include_router(users.router)

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useRoles } from "../../services/roleService";
 
 const RolesTable: React.FC = () => {
