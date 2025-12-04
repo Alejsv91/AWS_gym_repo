@@ -3,7 +3,6 @@ from fastapi.security import HTTPBearer
 from core.auth import get_current_user
 from services.roles_service import fetch_roles
 
-
 security = HTTPBearer()
 
 router = APIRouter(prefix="/roles", tags=["roles"])

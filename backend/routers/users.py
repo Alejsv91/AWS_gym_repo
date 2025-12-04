@@ -1,7 +1,7 @@
 from fastapi.security import HTTPBearer
 from fastapi import APIRouter, Depends
 from core.auth import get_current_user
-from services.users_services import fetch_users
+from services.users_service import fetch_users
 security = HTTPBearer()
 
 router = APIRouter(prefix="/users", tags=["users"])

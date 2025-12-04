@@ -1,10 +1,9 @@
 import RolesTable from "../components/role/RolesTables";
 
 const Roles: React.FC = () => {
-
   return (
     <div>
-      <RolesTable/>
+      <RolesTable />
     </div>
   );
 };
