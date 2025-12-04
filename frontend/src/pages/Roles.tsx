@@ -1,4 +1,4 @@
-import RolesTable from "../components/role/RolesTables";
+import RolesTable from "../components/role/RolesTable";
 
 const Roles: React.FC = () => {
   return (

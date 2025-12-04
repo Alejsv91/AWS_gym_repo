@@ -1,4 +1,4 @@
-
+import UsersTable from "../components/users/UsersTable";
 
 const Users: React.FC = () => {
   // const api = useApi();
@@ -26,6 +26,10 @@ const Users: React.FC = () => {
   //     </ul>
   //   </div>
   // );
-  return <></>
+  return (
+    <>
+      <UsersTable />
+    </>
+  );
 };
 export default Users;
