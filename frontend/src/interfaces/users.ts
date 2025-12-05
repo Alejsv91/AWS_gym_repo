@@ -3,7 +3,6 @@ import { IdentificationType } from "./identification_type";
 
 export interface UserResponse {
   id: number;
-  username: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -14,7 +13,6 @@ export interface UserResponse {
 
 export interface UserRequest {
   id?: number; 
-  username: string;
   email: string;
   firstName: string;
   lastName: string;
