@@ -1,8 +1,6 @@
-import { getRoles } from "@testing-library/dom";
-
 const GYMS = '/gyms';
 const USERS = '/users';
-const ROLES = '/roles';
+const ROLES = '/roles/';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 export const GYM_ENDPOINTS = {
