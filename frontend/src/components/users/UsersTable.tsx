@@ -16,6 +16,9 @@ const UsersTable = () => {
               <th scope="col">Role</th>
               <th scope="col">Identification Type</th>
               <th scope="col">Identification Number</th>
+              <th scope="col">Nationality</th>
+              <th scope="col">Phone Number</th>
+              
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -28,6 +31,8 @@ const UsersTable = () => {
                 <td className="fw-bold">{user.role.name}</td>
                 <td className="fw-bold">{user.identificationType.name}</td>
                 <td className="fw-bold">{user.identificationNumber}</td>
+                <td className="fw-bold">{user.nationality}</td>
+                <td className="fw-bold">{user.phoneNumber}</td>
                 <td>
                   <button className="btn btn-sm btn-outline-success me-2">
                     Editar

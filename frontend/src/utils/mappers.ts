@@ -17,5 +17,8 @@ export function mapUser(apiUser: any): UserResponse {
       description: apiUser.identification_type.description
     },
     identificationNumber: apiUser.id_number,
+    address: apiUser.address,
+    nationality: apiUser.nationality,
+    phoneNumber: apiUser.phone_number
   };
 }
