@@ -1,7 +1,11 @@
 import { useUsers } from "../../services/userService";
+import { Link } from "react-router-dom";
+import { RouteName } from "../../constants/routeNames";
+import { PATHS } from "../../constants/paths";
 
 const UsersTable = () => {
   const users = useUsers();
+  const userDetailsRoute = PATHS.USER_DETAILS;
   return (
     <>
       <div className="container mt-5">
@@ -18,12 +22,11 @@ const UsersTable = () => {
               <th scope="col">Identification Number</th>
               <th scope="col">Nationality</th>
               <th scope="col">Phone Number</th>
-              
               <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user, index) => (
+            {users.map((user) => (
               <tr key={user.id}>
                 <td className="fw-bold">{user.email}</td>
                 <td className="fw-bold">{user.firstName}</td>
@@ -34,9 +37,9 @@ const UsersTable = () => {
                 <td className="fw-bold">{user.nationality}</td>
                 <td className="fw-bold">{user.phoneNumber}</td>
                 <td>
-                  <button className="btn btn-sm btn-outline-success me-2">
-                    Editar
-                  </button>
+                  <Link to={`${userDetailsRoute}${user.id}`} className="btn btn-sm btn-outline-success me-2">
+                    Edit
+                  </Link>
                   <button className="btn btn-sm btn-outline-danger">
                     Eliminar
                   </button>
