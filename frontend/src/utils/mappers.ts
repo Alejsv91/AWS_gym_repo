@@ -9,16 +9,23 @@ export function mapUser(apiUser: any): UserResponse {
     role: {
       id: apiUser.role.id,
       name: apiUser.role.name,
-      description: apiUser.role.description
+      description: apiUser.role.description,
     },
     identificationType: {
       id: apiUser.identification_type.id,
       name: apiUser.identification_type.name,
-      description: apiUser.identification_type.description
+      description: apiUser.identification_type.description,
     },
     identificationNumber: apiUser.id_number,
     address: apiUser.address,
     nationality: apiUser.nationality,
-    phoneNumber: apiUser.phone_number
+    phoneNumber: apiUser.phone_number,
+  };
+}
+
+export function mapDropdownOption(id: any, name: any) {
+  return {
+    id: id,
+    name: name,
   };
 }

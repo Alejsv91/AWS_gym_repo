@@ -11,5 +11,7 @@ export function useFetchNationalities() {
       setNationalities(n);
     };
     fetchNationalities();
+    setNationalities(nationalities);
   })
+  return nationalities;
 }

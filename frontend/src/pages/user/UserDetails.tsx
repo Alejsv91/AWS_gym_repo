@@ -4,11 +4,11 @@ import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
 import { useEffect, useState } from "react";
 import { UserResponse } from "../../interfaces/users";
+import { mapDropdownOption } from "../../utils/mappers";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
   const userInfo = useFetchUserById(id!);
-  const nationalities = useFetchNationalities();
   const [userUpdate, setUserUpdate] = useState<UserResponse | null>(null);
 
   useEffect(() => {
@@ -16,6 +16,9 @@ export default function UserDetails() {
       setUserUpdate(userInfo);
     }
   }, [userInfo]);
+
+
+
   const inputs = [
     {
       label: "First Name",
@@ -55,13 +58,29 @@ export default function UserDetails() {
       selectedValue: userUpdate ? userUpdate.role.name : "",
       options: useRoles(),
       updateFunction: updateRoleDropdown,
+      currentValue: userUpdate ? userUpdate.role.id : "", 
     },
+    {
+      label: "Nationality",
+      selectedVale: userUpdate ? userUpdate.nationality : "",
+      options: useFetchNationalities().map((n) => mapDropdownOption(n,n)),
+      updateFunction: updateNationalityDropdown,
+      currentValue: userUpdate ? userUpdate.nationality : "",
+    }
   ];
 
   function updateRoleDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
     setUserUpdate((prev) =>
       prev
         ? { ...prev, role: { ...prev.role, id: Number(e.target.value) } }
+        : prev
+    );
+  }
+
+  function updateNationalityDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
+    setUserUpdate((prev) =>
+      prev
+        ? { ...prev, nationality: e.target.value }
         : prev
     );
   }
@@ -85,7 +104,7 @@ export default function UserDetails() {
             <label className="form-label">{dropdown.label}</label>
             <select
               className="form-select"
-              value={userUpdate?.role.id || ""}
+              value={dropdown.currentValue || ""}
               onChange={(e) =>
                 dropdown.updateFunction ? dropdown.updateFunction(e) : undefined
               }
