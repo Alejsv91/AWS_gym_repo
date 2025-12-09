@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useFetchUserById } from "../../services/userService";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserResponse } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 
@@ -17,38 +17,48 @@ export default function UserDetails() {
     }
   }, [userInfo]);
 
-
-
   const inputs = [
     {
       label: "First Name",
       value: userUpdate ? userUpdate.firstName : "",
       type: "text",
+      id: "firstName",
+      updateFunction: updateInputValue
     },
     {
       label: "Last Name",
       value: userUpdate ? userUpdate.lastName : "",
       type: "text",
+      id: "lastName",
+      updateFunction: updateInputValue
     },
     {
       label: "Email",
       value: userUpdate ? userUpdate.email : "",
       type: "email",
+      id: "email",
+      updateFunction: updateInputValue
     },
     {
       label: "Identification Number",
       value: userUpdate ? userUpdate.identificationNumber : "",
       type: "text",
+      id: "identificationNumber",
+      updateFunction: updateInputValue
     },
     {
       label: "Phone Number",
-      value: userUpdate ? userUpdate.identificationNumber : "",
+      value: userUpdate ? userUpdate.phoneNumber : "",
       type: "text",
+      id: "phoneNumber",
+      updateFunction: updateInputValue
     },
     {
       label: "Address",
       value: userUpdate ? userUpdate.address : "",
       type: "text",
+      id: "address",
+      updateFunction: updateInputValue
     },
   ];
 
@@ -85,6 +95,15 @@ export default function UserDetails() {
     );
   }
 
+  function updateInputValue(e: React.ChangeEvent<HTMLInputElement>, field: keyof UserResponse) {
+    const value = e.target.value;
+    setUserUpdate((prev) =>
+      prev
+        ? { ...prev, [field]: value }
+        : prev
+    );
+  }
+
   return (
     <div className="container mt-4">
       <h2>User Details</h2>
@@ -96,6 +115,7 @@ export default function UserDetails() {
               type={input.type}
               className="form-control"
               value={input.value}
+              onChange={input.updateFunction ? (e) => input.updateFunction(e, input.id as keyof UserResponse) : undefined}
             />
           </div>
         ))}
