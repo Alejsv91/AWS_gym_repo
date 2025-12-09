@@ -2,53 +2,69 @@ import { useParams } from "react-router-dom";
 import { useFetchUserById } from "../../services/userService";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
-import { urlToHttpOptions } from "url";
+import { useEffect, useState } from "react";
+import { UserResponse } from "../../interfaces/users";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
   const userInfo = useFetchUserById(id!);
   const nationalities = useFetchNationalities();
+  const [userUpdate, setUserUpdate] = useState<UserResponse | null>(null);
+
+  useEffect(() => {
+    if (userInfo) {
+      setUserUpdate(userInfo);
+    }
+  }, [userInfo]);
   const inputs = [
     {
       label: "First Name",
-      value: userInfo ? userInfo.firstName : "",
+      value: userUpdate ? userUpdate.firstName : "",
       type: "text",
     },
     {
       label: "Last Name",
-      value: userInfo ? userInfo.lastName : "",
+      value: userUpdate ? userUpdate.lastName : "",
       type: "text",
     },
     {
       label: "Email",
-      value: userInfo ? userInfo.email : "",
+      value: userUpdate ? userUpdate.email : "",
       type: "email",
     },
     {
       label: "Identification Number",
-      value: userInfo ? userInfo.identificationNumber : "",
+      value: userUpdate ? userUpdate.identificationNumber : "",
       type: "text",
     },
     {
       label: "Phone Number",
-      value: userInfo ? userInfo.identificationNumber : "",
+      value: userUpdate ? userUpdate.identificationNumber : "",
       type: "text",
     },
     {
       label: "Address",
-      value: userInfo ? userInfo.address : "",
+      value: userUpdate ? userUpdate.address : "",
       type: "text",
-    }
+    },
   ];
 
   const dropdowns = [
     {
       label: "Role",
-      selectedValue: userInfo ? userInfo.role.name : "",
-      options: useRoles()
-    }
-
+      selectedValue: userUpdate ? userUpdate.role.name : "",
+      options: useRoles(),
+      updateFunction: updateRoleDropdown,
+    },
   ];
+
+  function updateRoleDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
+    setUserUpdate((prev) =>
+      prev
+        ? { ...prev, role: { ...prev.role, id: Number(e.target.value) } }
+        : prev
+    );
+  }
 
   return (
     <div className="container mt-4">
@@ -61,17 +77,21 @@ export default function UserDetails() {
               type={input.type}
               className="form-control"
               value={input.value}
-              readOnly
             />
           </div>
         ))}
         {dropdowns.map((dropdown, index) => (
           <div className="mb-3" key={index}>
             <label className="form-label">{dropdown.label}</label>
-            <select className="form-select" value={dropdown.selectedValue}>
-              <option value="">{dropdown.selectedValue}</option>
+            <select
+              className="form-select"
+              value={userUpdate?.role.id || ""}
+              onChange={(e) =>
+                dropdown.updateFunction ? dropdown.updateFunction(e) : undefined
+              }
+            >
               {dropdown.options.map((option) => (
-                <option key={option.id} value={option.name}>
+                <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
               ))}
