@@ -5,11 +5,13 @@ import { useRoles } from "../../services/roleService";
 import React, { useEffect, useState } from "react";
 import { UserResponse } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
+import  SaveModalUsers from "../../components/users/saveModalUsers";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
   const userInfo = useFetchUserById(id!);
   const [userUpdate, setUserUpdate] = useState<UserResponse | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (userInfo) {
@@ -23,42 +25,42 @@ export default function UserDetails() {
       value: userUpdate ? userUpdate.firstName : "",
       type: "text",
       id: "firstName",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
     {
       label: "Last Name",
       value: userUpdate ? userUpdate.lastName : "",
       type: "text",
       id: "lastName",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
     {
       label: "Email",
       value: userUpdate ? userUpdate.email : "",
       type: "email",
       id: "email",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
     {
       label: "Identification Number",
       value: userUpdate ? userUpdate.identificationNumber : "",
       type: "text",
       id: "identificationNumber",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
     {
       label: "Phone Number",
       value: userUpdate ? userUpdate.phoneNumber : "",
       type: "text",
       id: "phoneNumber",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
     {
       label: "Address",
       value: userUpdate ? userUpdate.address : "",
       type: "text",
       id: "address",
-      updateFunction: updateInputValue
+      updateFunction: updateInputValue,
     },
   ];
 
@@ -68,15 +70,15 @@ export default function UserDetails() {
       selectedValue: userUpdate ? userUpdate.role.name : "",
       options: useRoles(),
       updateFunction: updateRoleDropdown,
-      currentValue: userUpdate ? userUpdate.role.id : "", 
+      currentValue: userUpdate ? userUpdate.role.id : "",
     },
     {
       label: "Nationality",
       selectedVale: userUpdate ? userUpdate.nationality : "",
-      options: useFetchNationalities().map((n) => mapDropdownOption(n,n)),
+      options: useFetchNationalities().map((n) => mapDropdownOption(n, n)),
       updateFunction: updateNationalityDropdown,
       currentValue: userUpdate ? userUpdate.nationality : "",
-    }
+    },
   ];
 
   function updateRoleDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -89,20 +91,23 @@ export default function UserDetails() {
 
   function updateNationalityDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
     setUserUpdate((prev) =>
-      prev
-        ? { ...prev, nationality: e.target.value }
-        : prev
+      prev ? { ...prev, nationality: e.target.value } : prev
     );
   }
 
-  function updateInputValue(e: React.ChangeEvent<HTMLInputElement>, field: keyof UserResponse) {
+  function updateInputValue(
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof UserResponse
+  ) {
     const value = e.target.value;
-    setUserUpdate((prev) =>
-      prev
-        ? { ...prev, [field]: value }
-        : prev
-    );
+    setUserUpdate((prev) => (prev ? { ...prev, [field]: value } : prev));
   }
+
+  const handleSubmit = () => {
+    // Your save logic here
+    alert("Changes saved!");
+    setShowModal(false); // close modal after saving
+  };
 
   return (
     <div className="container mt-4">
@@ -115,7 +120,12 @@ export default function UserDetails() {
               type={input.type}
               className="form-control"
               value={input.value}
-              onChange={input.updateFunction ? (e) => input.updateFunction(e, input.id as keyof UserResponse) : undefined}
+              onChange={
+                input.updateFunction
+                  ? (e) =>
+                      input.updateFunction(e, input.id as keyof UserResponse)
+                  : undefined
+              }
             />
           </div>
         ))}
@@ -137,7 +147,18 @@ export default function UserDetails() {
             </select>
           </div>
         ))}
+        <div className="mb-3">
+          <button type="button" className="btn btn-primary" onClick={() => setShowModal(true)}>
+            Save Changes
+          </button>
+        </div>
       </form>
+
+      <SaveModalUsers
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={handleSubmit}
+      />
     </div>
   );
 }
