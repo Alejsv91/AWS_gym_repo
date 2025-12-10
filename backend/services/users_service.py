@@ -2,22 +2,13 @@ from core.db import get_connection
 from models.user import UserGet, UserUpdate
 from models.role import Role
 from models.identification_type import IdentificationType
+from repositories.user_queries import UPDATE_USER_QUERY, FETCH_USER_BY_ID_QUERY, FETCH_USERS_QUERY
 
 def update_user(user_id: int, user_data: UserUpdate):
     conn = get_connection()
     try: 
         cur = conn.cursor()
-        query = """UPDATE users
-                SET first_name = %s, 
-                last_name = %s, 
-                identification_type_id = %s,
-                id_number = %s, 
-                phone_number= %s, 
-                email=%s, 
-                address= %s, 
-                role_id=%s,
-                nationality=%s
-                WHERE id=   %s;"""
+        query = UPDATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
                   user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
                   user_data.role_id, user_data.nationality, user_id)
@@ -34,27 +25,7 @@ def fetch_user_by_id(user_id: int):
     conn = get_connection()
     try: 
         cur = conn.cursor()
-        query = """
-        SELECT 
-        u.id,
-        u.first_name,
-        u.last_name,
-        u.id_number,
-        u.phone_number,
-        u.email,
-        u.address,
-        u.nationality,
-        r.id AS role_id,
-        r.name AS role_name,
-        r.description AS role_description,
-        it.id AS identification_type_id,
-        it.name AS identification_type_name,
-        it.description AS identification_type_description
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-        JOIN identification_type it ON u.identification_type_id = it.id
-        WHERE u.id = %s;
-        """
+        query = FETCH_USER_BY_ID_QUERY
         cur.execute(query, (user_id,))
         row = cur.fetchone()
         user = create_user_object(row)
@@ -67,16 +38,7 @@ def fetch_users():
     conn = get_connection()
     try:
         cur = conn.cursor()
-        query = """
-        SELECT 
-            u.id, u.first_name, u.last_name, u.id_number, u.phone_number,
-            u.email, u.address, u.nationality,
-            r.id, r.name, r.description,
-            it.id, it.name, it.description
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-        JOIN identification_type it ON u.identification_type_id = it.id;
-    """
+        query = FETCH_USERS_QUERY
         cur.execute(query)
         print("Executed query to fetch users")
         rows = cur.fetchall()
