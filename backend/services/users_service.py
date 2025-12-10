@@ -1,7 +1,29 @@
 from core.db import get_connection
-from models.user import User
+from models.user import UserGet, UserUpdate
 from models.role import Role
 from models.identification_type import IdentificationType
+
+def update_user(user_id: int, user_data: UserUpdate):
+    conn = get_connection()
+    try: 
+        cur = conn.cursor()
+        query = """UPDATE users
+                SET first_name = %s, 
+                last_name = %s, 
+                identification_type_id = %s,
+                id_number = %s, 
+                phone_number= %s, 
+                email=%s, 
+                address= %s, 
+                role_id=%s,
+                nationality=%s
+                WHERE id=   %s;"""
+        values = (user_data.first_name, user_data.last_name, user_data.identification_type.id, 
+                  user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
+                  user_data.role.id, user_data.nationality, user_id)
+    finally:
+        cur.close()
+        conn.close()
 
 def fetch_user_by_id(user_id: int):
     conn = get_connection()
@@ -51,22 +73,27 @@ def fetch_users():
         JOIN identification_type it ON u.identification_type_id = it.id;
     """
         cur.execute(query)
+        print("Executed query to fetch users")
         rows = cur.fetchall()
         users = []
         for row in rows:
             user = create_user_object(row)
             users.append(user)
+            
+        print(users)
         return users
     finally:
         cur.close()
         conn.close()
 
-def create_user_object(row) -> User:
+def create_user_object(row) -> UserGet:
     role = Role(id=row[8], name=row[9], description=row[10])
+    print("Role created:", role)
     identification_type = IdentificationType(
         id=row[11], name=row[12], description=row[13]
     )
-    user = User(
+    print("Identification Type created:", identification_type)
+    user = UserGet(
         id=row[0],
         first_name=row[1],
         last_name=row[2],  
@@ -78,4 +105,5 @@ def create_user_object(row) -> User:
         role=role,
         identification_type=identification_type
     )
+    print("User created:", user)
     return user

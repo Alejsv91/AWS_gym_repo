@@ -12,6 +12,11 @@ export default function UserDetails() {
   const userInfo = useFetchUserById(id!);
   const [userUpdate, setUserUpdate] = useState<UserResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const rawNationalities = useFetchNationalities();
+  const roles = useRoles();
+  const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
+
+  
 
   useEffect(() => {
     if (userInfo) {
@@ -68,14 +73,14 @@ export default function UserDetails() {
     {
       label: "Role",
       selectedValue: userUpdate ? userUpdate.role.name : "",
-      options: useRoles(),
+      options: roles,
       updateFunction: updateRoleDropdown,
       currentValue: userUpdate ? userUpdate.role.id : "",
     },
     {
       label: "Nationality",
       selectedVale: userUpdate ? userUpdate.nationality : "",
-      options: useFetchNationalities().map((n) => mapDropdownOption(n, n)),
+      options: nationalities, 
       updateFunction: updateNationalityDropdown,
       currentValue: userUpdate ? userUpdate.nationality : "",
     },
