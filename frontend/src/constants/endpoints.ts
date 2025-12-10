@@ -12,5 +12,7 @@ export const ROLE_ENDPOINTS = {
 }
 
 export const USER_ENDPOINT = {
-    getUsers: `${USERS}`
+    getUsers: `${USERS}`,
+    getUserById: (id: string) => `${USERS}/${id}`
 }
+
