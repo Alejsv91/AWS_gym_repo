@@ -16,8 +16,6 @@ export default function UserDetails() {
   const roles = useRoles();
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
 
-  
-
   useEffect(() => {
     if (userInfo) {
       setUserUpdate(userInfo);

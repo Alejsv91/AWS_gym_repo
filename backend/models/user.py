@@ -16,7 +16,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     role_id: int
-    Identification_type_id: int
+    identification_type_id: int
     
 class UserGet(UserBase):
     id: int

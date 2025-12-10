@@ -18,9 +18,14 @@ def update_user(user_id: int, user_data: UserUpdate):
                 role_id=%s,
                 nationality=%s
                 WHERE id=   %s;"""
-        values = (user_data.first_name, user_data.last_name, user_data.identification_type.id, 
+        values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
                   user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
-                  user_data.role.id, user_data.nationality, user_id)
+                  user_data.role_id, user_data.nationality, user_id)
+        print("Executing update with values:", values)
+        cur.execute(query, values)
+        cur.execute(query, values)
+        conn.commit()  # ✅ commit the transaction
+        return True
     finally:
         cur.close()
         conn.close()
@@ -79,7 +84,6 @@ def fetch_users():
         for row in rows:
             user = create_user_object(row)
             users.append(user)
-            
         print(users)
         return users
     finally:
