@@ -1,33 +1,31 @@
 from core.db import get_connection
-from models.user import User
+from models.user import UserGet, UserUpdate
 from models.role import Role
 from models.identification_type import IdentificationType
+from repositories.user_queries import UPDATE_USER_QUERY, FETCH_USER_BY_ID_QUERY, FETCH_USERS_QUERY
+
+def update_user(user_id: int, user_data: UserUpdate):
+    conn = get_connection()
+    try: 
+        cur = conn.cursor()
+        query = UPDATE_USER_QUERY
+        values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
+                  user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
+                  user_data.role_id, user_data.nationality, user_id)
+        print("Executing update with values:", values)
+        cur.execute(query, values)
+        cur.execute(query, values)
+        conn.commit()  # ✅ commit the transaction
+        return True
+    finally:
+        cur.close()
+        conn.close()
 
 def fetch_user_by_id(user_id: int):
     conn = get_connection()
     try: 
         cur = conn.cursor()
-        query = """
-        SELECT 
-        u.id,
-        u.first_name,
-        u.last_name,
-        u.id_number,
-        u.phone_number,
-        u.email,
-        u.address,
-        u.nationality,
-        r.id AS role_id,
-        r.name AS role_name,
-        r.description AS role_description,
-        it.id AS identification_type_id,
-        it.name AS identification_type_name,
-        it.description AS identification_type_description
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-        JOIN identification_type it ON u.identification_type_id = it.id
-        WHERE u.id = %s;
-        """
+        query = FETCH_USER_BY_ID_QUERY
         cur.execute(query, (user_id,))
         row = cur.fetchone()
         user = create_user_object(row)
@@ -40,33 +38,28 @@ def fetch_users():
     conn = get_connection()
     try:
         cur = conn.cursor()
-        query = """
-        SELECT 
-            u.id, u.first_name, u.last_name, u.id_number, u.phone_number,
-            u.email, u.address, u.nationality,
-            r.id, r.name, r.description,
-            it.id, it.name, it.description
-        FROM users u
-        JOIN roles r ON u.role_id = r.id
-        JOIN identification_type it ON u.identification_type_id = it.id;
-    """
+        query = FETCH_USERS_QUERY
         cur.execute(query)
+        print("Executed query to fetch users")
         rows = cur.fetchall()
         users = []
         for row in rows:
             user = create_user_object(row)
             users.append(user)
+        print(users)
         return users
     finally:
         cur.close()
         conn.close()
 
-def create_user_object(row) -> User:
+def create_user_object(row) -> UserGet:
     role = Role(id=row[8], name=row[9], description=row[10])
+    print("Role created:", role)
     identification_type = IdentificationType(
         id=row[11], name=row[12], description=row[13]
     )
-    user = User(
+    print("Identification Type created:", identification_type)
+    user = UserGet(
         id=row[0],
         first_name=row[1],
         last_name=row[2],  
@@ -78,4 +71,5 @@ def create_user_object(row) -> User:
         role=role,
         identification_type=identification_type
     )
+    print("User created:", user)
     return user

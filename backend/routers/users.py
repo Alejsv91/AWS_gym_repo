@@ -1,7 +1,10 @@
 from fastapi.security import HTTPBearer
 from fastapi import APIRouter, Depends
 from core.auth import get_current_user
-from services.users_service import fetch_users, fetch_user_by_id
+from services.users_service import fetch_users, fetch_user_by_id, update_user
+from fastapi import HTTPException
+from models.user import UserUpdate
+
 security = HTTPBearer()
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -19,3 +22,15 @@ def get_user_by_id(user_id: int, user=Depends(get_current_user)):
         return fetch_user_by_id(user_id)
     except Exception as e:
         return {"error": str(e)}
+
+@router.put("/{user_id}")
+def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_current_user)):
+    try: 
+        currentUser= fetch_user_by_id(user_id)
+        if not currentUser:
+            raise HTTPException(status_code=404, detail="User not found")
+        update_user(user_id, user_data)
+        updated_user = fetch_user_by_id(user_id)
+        return updated_user
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while updating the user: " + str(e))
