@@ -36,14 +36,29 @@ export function useFetchUserById(id: string) {
   return user;
 }
 
-export function useUpdateUser(id: string, userData: Partial<UserUpdateRequest>) {
+export function useUpdateUser(
+  id: string,
+  userData: Partial<UserUpdateRequest>
+) {
   const api = useApi();
-
   const updateUser = async () => {
-    const { data } = await api.put(USER_ENDPOINT.updateUser(id), toUserUpdateRequest(userData as UserResponse));
-    return mapUser(data);
+    try {
+      const response = await api.put(
+        USER_ENDPOINT.updateUser(id),
+        toUserUpdateRequest(userData as UserResponse)
+      );
+      if (response.status !== 200) {
+        console.error("Failed to update user:", response.status, response.data);
+        throw new Error(`Update failed with status ${response.status}`);
+      }
+      alert("Changes saved!");
+      return true;
+    } catch (error) {
+      console.error("Update error:", error);
+      alert("An error occurred while updating the user");
+      throw error;
+    }
   };
-
   console.log("useUpdateUser called with:", id, userData);
   return updateUser;
 }

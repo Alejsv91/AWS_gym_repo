@@ -110,7 +110,6 @@ export default function UserDetails() {
 
   const handleSubmit = () => {
     updateUser();
-    alert("Changes saved!");
     setShowModal(false); // close modal after saving
   };
 
