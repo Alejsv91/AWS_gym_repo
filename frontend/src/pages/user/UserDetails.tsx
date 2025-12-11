@@ -4,8 +4,9 @@ import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
 import React, { useEffect, useState } from "react";
 import { UserResponse } from "../../interfaces/users";
-import { mapDropdownOption } from "../../utils/mappers";
-import  SaveModalUsers from "../../components/users/saveModalUsers";
+import { mapDropdownOption, toUserUpdateRequest } from "../../utils/mappers";
+import SaveModalUsers from "../../components/users/saveModalUsers";
+import { useUpdateUser } from "../../services/userService";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ export default function UserDetails() {
   const rawNationalities = useFetchNationalities();
   const roles = useRoles();
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
+  const updateUser = useUpdateUser(id! , userUpdate!);
 
   useEffect(() => {
     if (userInfo) {
@@ -78,7 +80,7 @@ export default function UserDetails() {
     {
       label: "Nationality",
       selectedVale: userUpdate ? userUpdate.nationality : "",
-      options: nationalities, 
+      options: nationalities,
       updateFunction: updateNationalityDropdown,
       currentValue: userUpdate ? userUpdate.nationality : "",
     },
@@ -107,7 +109,7 @@ export default function UserDetails() {
   }
 
   const handleSubmit = () => {
-    // Your save logic here
+    updateUser();
     alert("Changes saved!");
     setShowModal(false); // close modal after saving
   };
@@ -151,12 +153,15 @@ export default function UserDetails() {
           </div>
         ))}
         <div className="mb-3">
-          <button type="button" className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setShowModal(true)}
+          >
             Save Changes
           </button>
         </div>
       </form>
-
       <SaveModalUsers
         show={showModal}
         onClose={() => setShowModal(false)}

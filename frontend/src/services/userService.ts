@@ -1,8 +1,8 @@
 import { useApi } from "./api";
 import { USER_ENDPOINT } from "../constants/endpoints";
 import { useEffect, useState } from "react";
-import { UserResponse } from "../interfaces/users";
-import { mapUser } from "../utils/mappers";
+import { UserResponse, UserUpdateRequest } from "../interfaces/users";
+import { mapUser, toUserUpdateRequest } from "../utils/mappers";
 
 export function useUsers() {
   const api = useApi();
@@ -34,4 +34,16 @@ export function useFetchUserById(id: string) {
     fetchUserById();
   }, []);
   return user;
+}
+
+export function useUpdateUser(id: string, userData: Partial<UserUpdateRequest>) {
+  const api = useApi();
+
+  const updateUser = async () => {
+    const { data } = await api.put(USER_ENDPOINT.updateUser(id), toUserUpdateRequest(userData as UserResponse));
+    return mapUser(data);
+  };
+
+  console.log("useUpdateUser called with:", id, userData);
+  return updateUser;
 }
