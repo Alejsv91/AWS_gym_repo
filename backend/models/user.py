@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from models.role import Role
 from models.identification_type import IdentificationType
 
