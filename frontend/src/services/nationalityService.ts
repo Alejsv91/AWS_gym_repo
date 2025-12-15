@@ -13,6 +13,6 @@ export function useFetchNationalities() {
     };
     fetchNationalities();
     setNationalities(nationalities);
-  }, [nationalities]); 
+  }, []); 
   return nationalities;
 }
