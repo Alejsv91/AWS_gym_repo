@@ -157,7 +157,6 @@ export default function UserDetails() {
           }
         : prev
     );
-    validateIdNumber(userUpdate?.identificationNumber || "");
   }
 
   function updateNationalityDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -196,6 +195,7 @@ export default function UserDetails() {
           <div className="mb-3" key={index}>
             <label className="form-label">{input.label}</label>
             <input
+              id={input.id}
               type={input.type}
               className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
               value={input.value}
