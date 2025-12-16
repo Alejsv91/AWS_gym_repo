@@ -7,7 +7,7 @@ import { UserResponse } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "../../components/users/saveModalUsers";
 import { useUpdateUser } from "../../services/userService";
-import { error } from "console";
+import { getIdTypeByLabel } from "../../constants/idTypes";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +33,7 @@ export default function UserDetails() {
       type: "text",
       id: "firstName",
       updateFunction: updateInputValue,
-      validentionFunction: validateAlphabeticInput,
+      validationFunction: validateAlphabeticInput,
     },
     {
       label: "Last Name",
@@ -41,7 +41,7 @@ export default function UserDetails() {
       type: "text",
       id: "lastName",
       updateFunction: updateInputValue,
-      validentionFunction: validateAlphabeticInput,  
+      validationFunction: validateAlphabeticInput,
     },
     {
       label: "Email",
@@ -49,6 +49,7 @@ export default function UserDetails() {
       type: "email",
       id: "email",
       updateFunction: updateInputValue,
+      validationFunction: validateEmail,
     },
     {
       label: "Identification Number",
@@ -56,6 +57,7 @@ export default function UserDetails() {
       type: "text",
       id: "identificationNumber",
       updateFunction: updateInputValue,
+      validationFunction: validateIdNumber
     },
     {
       label: "Phone Number",
@@ -63,6 +65,7 @@ export default function UserDetails() {
       type: "text",
       id: "phoneNumber",
       updateFunction: updateInputValue,
+      validationFunction: validatePhone,
     },
     {
       label: "Address",
@@ -83,12 +86,25 @@ export default function UserDetails() {
     },
     {
       label: "Nationality",
-      selectedVale: userUpdate ? userUpdate.nationality : "",
+      selectedValue: userUpdate ? userUpdate.nationality : "",
       options: nationalities,
       updateFunction: updateNationalityDropdown,
       currentValue: userUpdate ? userUpdate.nationality : "",
     },
+    {
+      label: "Identification Type",
+      selectedValue: userUpdate ? userUpdate.identificationType.name : "",
+      options: []
+    }
   ];
+
+  function validateIdNumber(id: string): string {
+    const selectedIdType = getIdTypeByLabel(userUpdate?.identificationType.name || "");
+    const regex = selectedIdType?.regex;
+    return regex?.test(id)
+      ? ""
+      : selectedIdType?.warningMessage || "Invalid ID format.";
+  }
 
   function validateAlphabeticInput(name: string, label?: string): string {
     const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
@@ -101,7 +117,7 @@ export default function UserDetails() {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email) ? "" : "Invalid email format.";
   }
-  
+
   function validatePhone(phone: string) {
     const regex = /^[0-9]{8,15}$/;
     return regex.test(phone) ? "" : "Phone number must be 8–15 digits.";
@@ -129,8 +145,8 @@ export default function UserDetails() {
     setUserUpdate((prev) => (prev ? { ...prev, [field]: value } : prev));
 
     const inputDef = inputs.find((input) => input.id === field);
-    if (inputDef?.validentionFunction) {
-      const errorMsg = inputDef.validentionFunction(value, inputDef.label);
+    if (inputDef?.validationFunction) {
+      const errorMsg = inputDef.validationFunction(value, inputDef.label);
       setErrors((prevErrors) => ({
         ...prevErrors,
         [field]: errorMsg,
