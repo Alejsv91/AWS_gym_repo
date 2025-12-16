@@ -4,9 +4,14 @@ import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
 import React, { useEffect, useState } from "react";
 import { UserResponse } from "../../interfaces/users";
-import { mapDropdownOption, toUserUpdateRequest } from "../../utils/mappers";
+import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "../../components/users/saveModalUsers";
 import { useUpdateUser } from "../../services/userService";
+import { getIdTypeByLabel } from "../../constants/idTypes";
+import {
+  useFetchIdentificationTypes,
+  getIdentificationTypeById,
+} from "../../services/identificationType";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
@@ -15,8 +20,10 @@ export default function UserDetails() {
   const [showModal, setShowModal] = useState(false);
   const rawNationalities = useFetchNationalities();
   const roles = useRoles();
+  const idTypes = useFetchIdentificationTypes();
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
-  const updateUser = useUpdateUser(id! , userUpdate!);
+  const updateUser = useUpdateUser(id!, userUpdate!);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (userInfo) {
@@ -31,6 +38,7 @@ export default function UserDetails() {
       type: "text",
       id: "firstName",
       updateFunction: updateInputValue,
+      validationFunction: validateAlphabeticInput,
     },
     {
       label: "Last Name",
@@ -38,6 +46,7 @@ export default function UserDetails() {
       type: "text",
       id: "lastName",
       updateFunction: updateInputValue,
+      validationFunction: validateAlphabeticInput,
     },
     {
       label: "Email",
@@ -45,6 +54,7 @@ export default function UserDetails() {
       type: "email",
       id: "email",
       updateFunction: updateInputValue,
+      validationFunction: validateEmail,
     },
     {
       label: "Identification Number",
@@ -52,6 +62,7 @@ export default function UserDetails() {
       type: "text",
       id: "identificationNumber",
       updateFunction: updateInputValue,
+      validationFunction: validateIdNumber,
     },
     {
       label: "Phone Number",
@@ -59,6 +70,7 @@ export default function UserDetails() {
       type: "text",
       id: "phoneNumber",
       updateFunction: updateInputValue,
+      validationFunction: validatePhone,
     },
     {
       label: "Address",
@@ -79,17 +91,70 @@ export default function UserDetails() {
     },
     {
       label: "Nationality",
-      selectedVale: userUpdate ? userUpdate.nationality : "",
+      selectedValue: userUpdate ? userUpdate.nationality : "",
       options: nationalities,
       updateFunction: updateNationalityDropdown,
       currentValue: userUpdate ? userUpdate.nationality : "",
     },
+    {
+      label: "Identification Type",
+      selectedValue: userUpdate ? userUpdate.identificationType.name : "",
+      options: idTypes,
+      updateFunction: updateIdentificationTypeDropdown,
+      currentValue: userUpdate ? userUpdate.identificationType.id : "",
+    },
   ];
+
+  function validateIdNumber(id: string): string {
+    const selectedIdType = getIdTypeByLabel(
+      userUpdate?.identificationType.name || ""
+    );
+    const regex = selectedIdType?.regex;
+    return regex?.test(id)
+      ? ""
+      : selectedIdType?.warningMessage || "Invalid ID format.";
+  }
+
+  function validateAlphabeticInput(name: string, label?: string): string {
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+    return regex.test(name)
+      ? ""
+      : `${label} can only contain letters and spaces.`;
+  }
+
+  function validateEmail(email: string) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email) ? "" : "Invalid email format.";
+  }
+
+  function validatePhone(phone: string) {
+    const regex = /^[0-9]{8,15}$/;
+    return regex.test(phone) ? "" : "Phone number must be 8–15 digits.";
+  }
 
   function updateRoleDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
     setUserUpdate((prev) =>
       prev
         ? { ...prev, role: { ...prev.role, id: Number(e.target.value) } }
+        : prev
+    );
+  }
+
+  function updateIdentificationTypeDropdown(
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    const idValue = getIdentificationTypeById(idTypes, Number(e.target.value));
+    setUserUpdate((prev) =>
+      prev
+        ? {
+            ...prev,
+            identificationType: {
+              ...prev.identificationType,
+              id: Number(idValue?.id),
+              description: String(idValue?.description),
+              name: String(idValue?.name),
+            },
+          }
         : prev
     );
   }
@@ -106,6 +171,15 @@ export default function UserDetails() {
   ) {
     const value = e.target.value;
     setUserUpdate((prev) => (prev ? { ...prev, [field]: value } : prev));
+
+    const inputDef = inputs.find((input) => input.id === field);
+    if (inputDef?.validationFunction) {
+      const errorMsg = inputDef.validationFunction(value, inputDef.label);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [field]: errorMsg,
+      }));
+    }
   }
 
   const handleSubmit = () => {
@@ -121,8 +195,9 @@ export default function UserDetails() {
           <div className="mb-3" key={index}>
             <label className="form-label">{input.label}</label>
             <input
+              id={input.id}
               type={input.type}
-              className="form-control"
+              className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
               value={input.value}
               onChange={
                 input.updateFunction
@@ -131,6 +206,9 @@ export default function UserDetails() {
                   : undefined
               }
             />
+            {errors[input.id] && (
+              <div className="invalid-feedback">{errors[input.id]}</div>
+            )}
           </div>
         ))}
         {dropdowns.map((dropdown, index) => (

@@ -14,6 +14,7 @@ import { ROUTES } from "./constants/Routes";
 function App() {
   const auth = useAuth();
 
+  //SCRUM-28
   const signOutRedirect = () => {
     const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
     const logoutUri = "<logout uri>";

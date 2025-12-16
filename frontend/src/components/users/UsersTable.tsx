@@ -1,6 +1,5 @@
 import { useUsers } from "../../services/userService";
 import { Link } from "react-router-dom";
-import { RouteName } from "../../constants/routeNames";
 import { PATHS } from "../../constants/paths";
 
 const UsersTable = () => {

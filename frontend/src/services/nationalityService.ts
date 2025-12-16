@@ -1,5 +1,6 @@
 import { useApi } from "./api";
 import { useEffect, useState } from "react";
+
 export function useFetchNationalities() {
   const api = useApi();
   const [nationalities, setNationalities] = useState<string[]>([]);

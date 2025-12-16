@@ -6,7 +6,7 @@ from services.identification_type_service import fetch_identification_types
 
 security = HTTPBearer()
 
-router = APIRouter(prefix="/identification_types", tags=["identification_types"])
+router = APIRouter(prefix="/identification-types", tags=["identification-types"])
 
 @router.get("/")
 def get_identification_type(user=Depends(get_current_user)):
