@@ -14,7 +14,6 @@ export function useRoles() {
       setRoles(data);
     };
     fetchRoles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return roles;

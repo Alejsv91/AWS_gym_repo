@@ -8,6 +8,10 @@ import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "../../components/users/saveModalUsers";
 import { useUpdateUser } from "../../services/userService";
 import { getIdTypeByLabel } from "../../constants/idTypes";
+import {
+  useFetchIdentificationTypes,
+  getIdentificationTypeById,
+} from "../../services/identificationType";
 
 export default function UserDetails() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +20,7 @@ export default function UserDetails() {
   const [showModal, setShowModal] = useState(false);
   const rawNationalities = useFetchNationalities();
   const roles = useRoles();
+  const idTypes = useFetchIdentificationTypes();
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
   const updateUser = useUpdateUser(id!, userUpdate!);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -57,7 +62,7 @@ export default function UserDetails() {
       type: "text",
       id: "identificationNumber",
       updateFunction: updateInputValue,
-      validationFunction: validateIdNumber
+      validationFunction: validateIdNumber,
     },
     {
       label: "Phone Number",
@@ -94,12 +99,16 @@ export default function UserDetails() {
     {
       label: "Identification Type",
       selectedValue: userUpdate ? userUpdate.identificationType.name : "",
-      options: []
-    }
+      options: idTypes,
+      updateFunction: updateIdentificationTypeDropdown,
+      currentValue: userUpdate ? userUpdate.identificationType.id : "",
+    },
   ];
 
   function validateIdNumber(id: string): string {
-    const selectedIdType = getIdTypeByLabel(userUpdate?.identificationType.name || "");
+    const selectedIdType = getIdTypeByLabel(
+      userUpdate?.identificationType.name || ""
+    );
     const regex = selectedIdType?.regex;
     return regex?.test(id)
       ? ""
@@ -129,6 +138,26 @@ export default function UserDetails() {
         ? { ...prev, role: { ...prev.role, id: Number(e.target.value) } }
         : prev
     );
+  }
+
+  function updateIdentificationTypeDropdown(
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    const idValue = getIdentificationTypeById(idTypes, Number(e.target.value));
+    setUserUpdate((prev) =>
+      prev
+        ? {
+            ...prev,
+            identificationType: {
+              ...prev.identificationType,
+              id: Number(idValue?.id),
+              description: String(idValue?.description),
+              name: String(idValue?.name),
+            },
+          }
+        : prev
+    );
+    validateIdNumber(userUpdate?.identificationNumber || "");
   }
 
   function updateNationalityDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
