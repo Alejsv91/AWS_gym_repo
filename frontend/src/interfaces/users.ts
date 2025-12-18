@@ -21,7 +21,11 @@ export interface UserResponse extends UserBase {
 
 export interface UserRequest extends UserBase{
   id: number; 
-  email: string;
+  roleId: number;
+  identificationTypeId: number;
+}
+
+export interface UserCreateRequest extends UserBase {
   roleId: number;
   identificationTypeId: number;
 }

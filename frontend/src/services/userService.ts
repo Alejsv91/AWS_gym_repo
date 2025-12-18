@@ -26,6 +26,7 @@ export function useFetchUserById(id: string) {
   useEffect(() => {
     const fetchUserById = async () => {
       {
+        if (!id) return {} as UserResponse;
         const { data } = await api.get(USER_ENDPOINT.getUserById(id));
         const mappedUser = mapUser(data);
         setUser(mappedUser);
@@ -61,4 +62,8 @@ export function useUpdateUser(
   };
   console.log("useUpdateUser called with:", id, userData);
   return updateUser;
+}
+
+export function createUser(){
+  return true;
 }
