@@ -12,7 +12,8 @@ class UserBase(BaseModel):
     nationality: str
     
 class UserCreate(UserBase):
-    pass
+    role_id: int
+    identification_type_id: int
 
 class UserUpdate(UserBase):
     role_id: int

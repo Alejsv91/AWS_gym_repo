@@ -1,3 +1,10 @@
+CREATE_USER_QUERY = """
+INSERT INTO users (first_name, last_name, identification_type_id, id_number, phone_number, email, address, role_id, nationality)
+VALUES
+('%s', '%s', %s, '%s', '%s', '%s', '%s', %s, '%s')
+RETURNING id;
+"""
+
 UPDATE_USER_QUERY = """UPDATE users
                 SET first_name = %s, 
                 last_name = %s, 
@@ -41,3 +48,5 @@ FETCH_USERS_QUERY = """
         JOIN roles r ON u.role_id = r.id
         JOIN identification_type it ON u.identification_type_id = it.id;
     """
+    
+EMAIL_OR_ID_EXISTS_QUERY = "SELECT COUNT(*) FROM users WHERE email = %s OR id_number = %s"

@@ -1,12 +1,15 @@
 from core.db import get_connection
-from models.user import UserGet, UserUpdate
+from models.user import UserGet, UserUpdate, UserCreate
 from models.role import Role
 from models.identification_type import IdentificationType
-from repositories.user_queries import UPDATE_USER_QUERY, FETCH_USER_BY_ID_QUERY, FETCH_USERS_QUERY
+from repositories.user_queries import UPDATE_USER_QUERY, FETCH_USER_BY_ID_QUERY, FETCH_USERS_QUERY, CREATE_USER_QUERY, EMAIL_OR_ID_EXISTS_QUERY
+from fastapi import HTTPException
 
 def update_user(user_id: int, user_data: UserUpdate):
     conn = get_connection()
     try: 
+        if email_or_id_exists(conn, user_data.email, user_data.id_number):
+            raise HTTPException(status_code=400, detail="Email or ID number already exists")
         cur = conn.cursor()
         query = UPDATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
@@ -14,9 +17,24 @@ def update_user(user_id: int, user_data: UserUpdate):
                   user_data.role_id, user_data.nationality, user_id)
         print("Executing update with values:", values)
         cur.execute(query, values)
-        cur.execute(query, values)
-        conn.commit()  # ✅ commit the transaction
+        conn.commit() 
         return True
+    finally:
+        cur.close()
+        conn.close()
+
+def create_user(user_data: UserCreate):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        query = CREATE_USER_QUERY
+        values = (user_data.first_name, user_data.last_name, user_data.identification_type_id,
+                  user_data.id_number, user_data.phone_number, user_data.email,
+                  user_data.address, user_data.role_id, user_data.nationality)
+        cur.execute(query, values)
+        new_id = cur.fetchone()[0]
+        conn.commit()
+        return fetch_user_by_id(new_id)
     finally:
         cur.close()
         conn.close()
@@ -51,6 +69,14 @@ def fetch_users():
     finally:
         cur.close()
         conn.close()
+        
+def email_or_id_exists(conn, email: str, id_number: str) -> bool:
+    cur = conn.cursor()
+    query = EMAIL_OR_ID_EXISTS_QUERY
+    cur.execute(query, (email, id_number))
+    count = cur.fetchone()[0]
+    cur.close()
+    return count > 0
 
 def create_user_object(row) -> UserGet:
     role = Role(id=row[8], name=row[9], description=row[10])
