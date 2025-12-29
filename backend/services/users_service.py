@@ -39,6 +39,12 @@ def create_user(user_data: UserCreate):
         return fetch_user_by_id(new_id)
     except Exception as e:
         print("Error creating user:", e)
+        if "users_id_number_key" in str(e):
+            print("ID number already exists error detected")
+            raise HTTPException(status_code=400, detail="ID number already exists")
+        if "users_email_key" in str(e):
+            print("Email already exists error detected")
+            raise HTTPException(status_code=400, detail="Email already exists")
         raise
     finally:
         print("Closing connection after creating user")
