@@ -1,8 +1,8 @@
 import { useApi } from "./api";
 import { USER_ENDPOINT } from "../constants/endpoints";
 import { useEffect, useState } from "react";
-import { UserResponse, UserUpdateRequest } from "../interfaces/users";
-import { mapUser, toUserUpdateRequest } from "../utils/mappers";
+import { UserResponse, UserUpdateRequest, UserCreateRequest, UserCreate } from "../interfaces/users";
+import { mapUser, toUserUpdateRequest, toCreateUserRequest } from "../utils/mappers";
 
 export function useUsers() {
   const api = useApi();
@@ -64,6 +64,23 @@ export function useUpdateUser(
   return updateUser;
 }
 
-export function createUser(){
-  return true;
+export function useCreateUser(userData: Partial<UserCreateRequest>) {
+  const api = useApi();
+  const createUser = async () => {
+    try {
+      const response = await api.post(USER_ENDPOINT.createUser, toCreateUserRequest(userData as UserCreate));
+      if (response.status !== 201) {
+        console.error("Failed to create user:", response.status, response.data);
+        throw new Error(`Creation failed with status ${response.status}`);
+      }
+      alert("User created successfully!");
+      return true;
+    } catch (error) {
+      console.error("Creation error:", error);
+      alert("An error occurred while creating the user");
+      throw error;
+    }
+  };
+
+  return createUser;
 }

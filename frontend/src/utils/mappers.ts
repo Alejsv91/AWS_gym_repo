@@ -1,5 +1,4 @@
-import { UserResponse } from "../interfaces/users";
-import { UserUpdatePayload } from "../interfaces/users";
+import { UserCreatePayload, UserResponse, UserCreate, UserUpdatePayload } from "../interfaces/users";
 
 export function mapUser(apiUser: any): UserResponse {
   return {
@@ -32,6 +31,20 @@ export function mapDropdownOption(id: any, name: any) {
 }
 
 export function toUserUpdateRequest(user: UserResponse): UserUpdatePayload{
+  return {
+    email: user.email,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    id_number: user.identificationNumber,
+    phone_number: user.phoneNumber,
+    address: user.address,
+    nationality: user.nationality,
+    role_id: user.role.id,
+    identification_type_id: user.identificationType.id
+  }
+}
+
+export function toCreateUserRequest(user: UserResponse): UserCreatePayload {
   return {
     email: user.email,
     first_name: user.firstName,

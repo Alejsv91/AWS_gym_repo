@@ -2,17 +2,17 @@ import { useParams } from "react-router-dom";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
 import { useState, useEffect } from "react";
-import { UserResponse } from "../../interfaces/users";
+import { UserCreate, UserResponse, UserDetails } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "./saveModalUsers";
-import { useUpdateUser } from "../../services/userService";
+import { useUpdateUser, useCreateUser } from "../../services/userService";
 import { getIdTypeByLabel } from "../../constants/idTypes";
 import {
   useFetchIdentificationTypes,
   getIdentificationTypeById,
 } from "../../services/identificationType";
-import { UserActions } from "../../constants/userActions";
 import { useFetchUserById } from "../../services/userService";
+import { UserActions } from "../../constants/userActions";
 
 interface FormUsersProps {
   userId?: string;
@@ -22,25 +22,36 @@ interface FormUsersProps {
 export default function FormUser(formUserProps: FormUsersProps) {
   const { id } = useParams<{ id: string }>();
   const userInfo = useFetchUserById(id!);
-  const [userUpdate, setUserUpdate] = useState<UserResponse | null>(null);
   const [showModal, setShowModal] = useState(false);
   const rawNationalities = useFetchNationalities();
   const roles = useRoles();
   const idTypes = useFetchIdentificationTypes();
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
-  const updateUser = useUpdateUser(id!, userUpdate!);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [userDetails, setUserDetails] = useState<UserDetails>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    identificationNumber: "",
+    phoneNumber: "",
+    address: "",
+    role: { id: 0, name: "", description: "" },
+    nationality: "",
+    identificationType: { id: 0, name: "", description: "" },
+  });
+  const updateUser = useUpdateUser(id!, userDetails!);
+  const createUser = useCreateUser(userDetails!);
 
   useEffect(() => {
     if (userInfo) {
-      setUserUpdate(userInfo);
+      setUserDetails(userInfo);
     }
   }, [userInfo]);
 
   const inputs = [
     {
       label: "First Name",
-      value: userUpdate ? userUpdate.firstName : "",
+      value: userDetails ? userDetails.firstName : "",
       type: "text",
       id: "firstName",
       updateFunction: updateInputValue,
@@ -48,7 +59,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     },
     {
       label: "Last Name",
-      value: userUpdate ? userUpdate.lastName : "",
+      value: userDetails ? userDetails.lastName : "",
       type: "text",
       id: "lastName",
       updateFunction: updateInputValue,
@@ -56,7 +67,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     },
     {
       label: "Email",
-      value: userUpdate ? userUpdate.email : "",
+      value: userDetails ? userDetails.email : "",
       type: "email",
       id: "email",
       updateFunction: updateInputValue,
@@ -64,7 +75,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     },
     {
       label: "Identification Number",
-      value: userUpdate ? userUpdate.identificationNumber : "",
+      value: userDetails ? userDetails.identificationNumber : "",
       type: "text",
       id: "identificationNumber",
       updateFunction: updateInputValue,
@@ -72,7 +83,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     },
     {
       label: "Phone Number",
-      value: userUpdate ? userUpdate.phoneNumber : "",
+      value: userDetails ? userDetails.phoneNumber : "",
       type: "text",
       id: "phoneNumber",
       updateFunction: updateInputValue,
@@ -80,7 +91,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     },
     {
       label: "Address",
-      value: userUpdate ? userUpdate.address : "",
+      value: userDetails ? userDetails.address : "",
       type: "text",
       id: "address",
       updateFunction: updateInputValue,
@@ -90,30 +101,30 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const dropdowns = [
     {
       label: "Role",
-      selectedValue: userUpdate ? userUpdate.role.name : "",
+      selectedValue: userDetails ? userDetails.role.name : "",
       options: roles,
       updateFunction: updateRoleDropdown,
-      currentValue: userUpdate ? userUpdate.role.id : "",
+      currentValue: userDetails ? userDetails.role.id : "",
     },
     {
       label: "Nationality",
-      selectedValue: userUpdate ? userUpdate.nationality : "",
+      selectedValue: userDetails ? userDetails.nationality : "",
       options: nationalities,
       updateFunction: updateNationalityDropdown,
-      currentValue: userUpdate ? userUpdate.nationality : "",
+      currentValue: userDetails ? userDetails.nationality : "",
     },
     {
       label: "Identification Type",
-      selectedValue: userUpdate ? userUpdate.identificationType.name : "",
+      selectedValue: userDetails ? userDetails.identificationType.name : "",
       options: idTypes,
       updateFunction: updateIdentificationTypeDropdown,
-      currentValue: userUpdate ? userUpdate.identificationType.id : "",
+      currentValue: userDetails ? userDetails.identificationType.id : "",
     },
   ];
 
   function validateIdNumber(id: string): string {
     const selectedIdType = getIdTypeByLabel(
-      userUpdate?.identificationType.name || ""
+      userDetails?.identificationType.name || ""
     );
     const regex = selectedIdType?.regex;
     return regex?.test(id)
@@ -139,7 +150,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
   }
 
   function updateRoleDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
-    setUserUpdate((prev) =>
+    setUserDetails((prev) =>
       prev
         ? { ...prev, role: { ...prev.role, id: Number(e.target.value) } }
         : prev
@@ -150,7 +161,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     e: React.ChangeEvent<HTMLSelectElement>
   ) {
     const idValue = getIdentificationTypeById(idTypes, Number(e.target.value));
-    setUserUpdate((prev) =>
+    setUserDetails((prev) =>
       prev
         ? {
             ...prev,
@@ -166,7 +177,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
   }
 
   function updateNationalityDropdown(e: React.ChangeEvent<HTMLSelectElement>) {
-    setUserUpdate((prev) =>
+    setUserDetails((prev) =>
       prev ? { ...prev, nationality: e.target.value } : prev
     );
   }
@@ -176,7 +187,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
     field: keyof UserResponse
   ) {
     const value = e.target.value;
-    setUserUpdate((prev) => (prev ? { ...prev, [field]: value } : prev));
+    setUserDetails((prev) => (prev ? { ...prev, [field]: value } : prev));
 
     const inputDef = inputs.find((input) => input.id === field);
     if (inputDef?.validationFunction) {
@@ -189,7 +200,12 @@ export default function FormUser(formUserProps: FormUsersProps) {
   }
 
   const handleSubmit = () => {
-    updateUser();
+    if (!userDetails) return;
+
+    formUserProps.userAction === UserActions.CREATE
+      ? createUser()
+      : updateUser();
+
     setShowModal(false); // close modal after saving
   };
 
@@ -241,7 +257,9 @@ export default function FormUser(formUserProps: FormUsersProps) {
             className="btn btn-primary"
             onClick={() => setShowModal(true)}
           >
-            {formUserProps.userAction === UserActions.CREATE ? "Create User" : "Update User"}
+            {formUserProps.userAction === UserActions.CREATE
+              ? "Create User"
+              : "Update User"}
           </button>
         </div>
       </form>

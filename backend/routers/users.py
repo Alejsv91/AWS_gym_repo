@@ -1,7 +1,7 @@
 from fastapi.security import HTTPBearer
 from fastapi import APIRouter, Depends
 from core.auth import get_current_user
-from services.users_service import fetch_users, fetch_user_by_id, update_user
+from services.users_service import fetch_users, fetch_user_by_id, update_user, create_user
 from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
 
@@ -36,9 +36,8 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
         raise HTTPException(status_code=500, detail="An error occurred while updating the user: " + str(e))
 
 @router.post("/", response_model=UserGet, status_code=201)
-def create_user(user_data: UserCreate, user=Depends(get_current_user)):
+def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     try:
-        create_user(user_data)
-        new_user = fetch_user_by_id(user_data.id)
+        return create_user(user_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))

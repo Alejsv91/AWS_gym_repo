@@ -1,6 +1,6 @@
 import { useParams, useLocation } from "react-router-dom";
 import { UserActions } from "../../constants/userActions";
-import  FormUser  from "../../components/users/FormUser";
+import FormUser from "../../components/users/FormUser";
 
 export default function UserDetails() {
   const location = useLocation();
@@ -13,8 +13,7 @@ export default function UserDetails() {
           ? "User Create Page - Under Construction"
           : "User Details Page - Under Construction"}
       </div>
-      <FormUser userId={id}
-       userAction={action}/>
+      <FormUser userId={id} userAction={action} />
     </>
   );
   // const { id } = useParams<{ id: string }>();
