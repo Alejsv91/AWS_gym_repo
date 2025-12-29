@@ -26,16 +26,22 @@ def update_user(user_id: int, user_data: UserUpdate):
 def create_user(user_data: UserCreate):
     conn = get_connection()
     try:
+        print('Creating user with data:', user_data)
         cur = conn.cursor()
         query = CREATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id,
                   user_data.id_number, user_data.phone_number, user_data.email,
                   user_data.address, user_data.role_id, user_data.nationality)
         cur.execute(query, values)
+        print("Executed create user with values:", values)
         new_id = cur.fetchone()[0]
         conn.commit()
         return fetch_user_by_id(new_id)
+    except Exception as e:
+        print("Error creating user:", e)
+        raise
     finally:
+        print("Closing connection after creating user")
         cur.close()
         conn.close()
 

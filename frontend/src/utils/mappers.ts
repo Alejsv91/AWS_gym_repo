@@ -46,14 +46,14 @@ export function toUserUpdateRequest(user: UserResponse): UserUpdatePayload{
 
 export function toCreateUserRequest(user: UserResponse): UserCreatePayload {
   return {
-    email: user.email,
     first_name: user.firstName,
     last_name: user.lastName,
+    identification_type_id: user.identificationType.id,
     id_number: user.identificationNumber,
     phone_number: user.phoneNumber,
+    email: user.email,
     address: user.address,
-    nationality: user.nationality,
     role_id: user.role.id,
-    identification_type_id: user.identificationType.id
+    nationality: user.nationality,
   }
 }

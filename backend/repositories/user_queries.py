@@ -1,7 +1,16 @@
 CREATE_USER_QUERY = """
-INSERT INTO users (first_name, last_name, identification_type_id, id_number, phone_number, email, address, role_id, nationality)
+INSERT INTO users 
+(first_name, 
+last_name, 
+identification_type_id, 
+id_number, 
+phone_number, 
+email, 
+address, 
+role_id, 
+nationality)
 VALUES
-('%s', '%s', %s, '%s', '%s', '%s', '%s', %s, '%s')
+(%s, %s, %s, %s, %s, %s, %s, %s, %s)
 RETURNING id;
 """
 
