@@ -41,6 +41,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
   });
   const updateUser = useUpdateUser(id!, userDetails!);
   const createUser = useCreateUser(userDetails!);
+  const USER_ACTIONS = UserActions;
 
   useEffect(() => {
     if (userInfo) {
@@ -201,8 +202,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
   const handleSubmit = () => {
     if (!userDetails) return;
-
-    formUserProps.userAction === UserActions.CREATE
+    formUserProps.userAction === USER_ACTIONS.CREATE
       ? createUser()
       : updateUser();
 
