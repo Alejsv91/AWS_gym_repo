@@ -64,10 +64,8 @@ export function useUpdateUser(
       }
       alert("Changes saved!");
       return true;
-    } catch (error) {
-      console.error("Update error:", error);
-      alert("An error occurred while updating the user");
-      throw error;
+    } catch (error: AxiosError | any) {
+      getErrorMessage(error);
     }
   };
   console.log("useUpdateUser called with:", id, userData);
@@ -89,13 +87,16 @@ export function useCreateUser(userData: Partial<UserCreateRequest>) {
       alert("User created successfully!");
       return true;
     } catch (error: AxiosError | any) {
-      console.error("Creation error:", error);
-      const message =
-        error?.response?.data?.detail ||
-        "An unexpected error occurred while creating the user.";
-      alert(`An error occurred while creating the user: ${message}`);
+      getErrorMessage(error);
     }
   };
-
   return createUser;
+}
+
+function getErrorMessage(error: AxiosError | any) {
+  console.error("Creation error:", error);
+  const message =
+    error?.response?.data?.detail ||
+    "An unexpected error occurred while processing your request.";
+  alert(` ${message}`);
 }

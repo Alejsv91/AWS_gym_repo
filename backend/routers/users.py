@@ -31,6 +31,7 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
             raise HTTPException(status_code=404, detail="User not found")
         update_user(user_id, user_data)
         updated_user = fetch_user_by_id(user_id)
+        print("Updated user:", updated_user)
         return updated_user
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while updating the user: " + str(e))
