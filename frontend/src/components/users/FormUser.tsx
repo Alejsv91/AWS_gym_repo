@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { UserCreate, UserResponse, UserDetails } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "./saveModalUsers";
@@ -23,31 +23,42 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const { id } = useParams<{ id: string }>();
   const userInfo = useFetchUserById(id!);
   const [showModal, setShowModal] = useState(false);
-  const rawNationalities = useFetchNationalities();
-  const roles = useRoles();
-  const idTypes = useFetchIdentificationTypes();
+  const rawNationalities = useFetchNationalities() || [];
+  const roles = useRoles() || [];
+  const idTypes = useFetchIdentificationTypes() || [];
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
+  const loading =
+    nationalities.length === 0 || roles.length === 0 || idTypes.length === 0;
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [userDetails, setUserDetails] = useState<UserDetails>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    identificationNumber: "",
-    phoneNumber: "",
-    address: "",
-    role: { id: 0, name: "", description: "" },
-    nationality: "",
-    identificationType: { id: 0, name: "", description: "" },
-  });
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const updateUser = useUpdateUser(id!, userDetails!);
   const createUser = useCreateUser(userDetails!);
   const USER_ACTIONS = UserActions;
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (userInfo) {
       setUserDetails(userInfo);
     }
   }, [userInfo]);
+
+  useEffect(() => {
+    if (!loading && !initialized && !userInfo) {
+      setUserDetails({
+        firstName: "",
+        lastName: "",
+        email: "",
+        identificationNumber: "",
+        phoneNumber: "",
+        address: "",
+        role: roles[0] || { id: 0, name: "", description: "" },
+        nationality: nationalities[0]?.name || "",
+        identificationType: idTypes[0] || { id: 0, name: "", description: "" },
+      });
+
+      setInitialized(true);
+    }
+  }, [loading, initialized, userInfo]);
 
   const inputs = [
     {
@@ -105,7 +116,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       selectedValue: userDetails ? userDetails.role.name : "",
       options: roles,
       updateFunction: updateRoleDropdown,
-      currentValue: userDetails ? userDetails.role.id : "",
+      currentValue: userDetails ? userDetails.role.id : roles[0]?.id,
     },
     {
       label: "Nationality",
@@ -208,11 +219,32 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
     setShowModal(false); // close modal after saving
   };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mt-4">
       <h2>User Details</h2>
       <form className="border p-3 rounded bg-light">
+        {dropdowns.map((dropdown, index) => (
+          <div className="mb-3" key={index}>
+            <label className="form-label">{dropdown.label}</label>
+            <select
+              className="form-select"
+              value={dropdown.currentValue}
+              onChange={(e) =>
+                dropdown.updateFunction ? dropdown.updateFunction(e) : undefined
+              }
+            >
+              {dropdown.options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
         {inputs.map((input, index) => (
           <div className="mb-3" key={index}>
             <label className="form-label">{input.label}</label>
@@ -231,24 +263,6 @@ export default function FormUser(formUserProps: FormUsersProps) {
             {errors[input.id] && (
               <div className="invalid-feedback">{errors[input.id]}</div>
             )}
-          </div>
-        ))}
-        {dropdowns.map((dropdown, index) => (
-          <div className="mb-3" key={index}>
-            <label className="form-label">{dropdown.label}</label>
-            <select
-              className="form-select"
-              value={dropdown.currentValue || ""}
-              onChange={(e) =>
-                dropdown.updateFunction ? dropdown.updateFunction(e) : undefined
-              }
-            >
-              {dropdown.options.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
           </div>
         ))}
         <div className="mb-3">

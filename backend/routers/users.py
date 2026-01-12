@@ -39,5 +39,3 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 @router.post("/", response_model=UserGet, status_code=201)
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
         return create_user(user_data)
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))
