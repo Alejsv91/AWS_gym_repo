@@ -1,8 +1,18 @@
 import { useApi } from "./api";
 import { USER_ENDPOINT } from "../constants/endpoints";
 import { useEffect, useState } from "react";
-import { UserResponse, UserUpdateRequest } from "../interfaces/users";
-import { mapUser, toUserUpdateRequest } from "../utils/mappers";
+import {
+  UserResponse,
+  UserUpdateRequest,
+  UserCreateRequest,
+  UserCreate,
+} from "../interfaces/users";
+import {
+  mapUser,
+  toUserUpdateRequest,
+  toCreateUserRequest,
+} from "../utils/mappers";
+import { AxiosError } from "axios";
 
 export function useUsers() {
   const api = useApi();
@@ -26,6 +36,7 @@ export function useFetchUserById(id: string) {
   useEffect(() => {
     const fetchUserById = async () => {
       {
+        if (!id) return {} as UserResponse;
         const { data } = await api.get(USER_ENDPOINT.getUserById(id));
         const mappedUser = mapUser(data);
         setUser(mappedUser);
@@ -53,12 +64,39 @@ export function useUpdateUser(
       }
       alert("Changes saved!");
       return true;
-    } catch (error) {
-      console.error("Update error:", error);
-      alert("An error occurred while updating the user");
-      throw error;
+    } catch (error: AxiosError | any) {
+      getErrorMessage(error);
     }
   };
   console.log("useUpdateUser called with:", id, userData);
   return updateUser;
+}
+
+export function useCreateUser(userData: Partial<UserCreateRequest>) {
+  const api = useApi();
+  const createUser = async () => {
+    try {
+      const response = await api.post(
+        USER_ENDPOINT.createUser,
+        toCreateUserRequest(userData as UserCreate)
+      );
+      if (response.status !== 201) {
+        console.error("Failed to create user:", response.status, response.data);
+        throw new Error(`Creation failed with status ${response.status}`);
+      }
+      alert("User created successfully!");
+      return true;
+    } catch (error: AxiosError | any) {
+      getErrorMessage(error);
+    }
+  };
+  return createUser;
+}
+
+function getErrorMessage(error: AxiosError | any) {
+  console.error("Creation error:", error);
+  const message =
+    error?.response?.data?.detail ||
+    "An unexpected error occurred while processing your request.";
+  alert(` ${message}`);
 }

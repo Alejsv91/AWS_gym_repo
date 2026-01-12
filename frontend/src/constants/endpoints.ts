@@ -15,7 +15,8 @@ export const ROLE_ENDPOINTS = {
 export const USER_ENDPOINT = {
     getUsers: `${USERS}`,
     getUserById: (id: string) => `${USERS}/${id}`,
-    updateUser: (id: string) => `${USERS}/${id}`    
+    updateUser: (id: string) => `${USERS}/${id}`,
+    createUser: `${USERS}`,    
 }
 
 export const IDENTIFICATION_TYPES_ENDPOINT = {

@@ -5,14 +5,18 @@ export function useFetchNationalities() {
   const api = useApi();
   const [nationalities, setNationalities] = useState<string[]>([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchNationalities = async () => {
-      const { data } = await api.get('https://restcountries.com/v3.1/all?fields=name,cca2');
-      const n = data.map((country: any) => country.name.common);
+      const { data } = await api.get(
+        "https://restcountries.com/v3.1/all?fields=name,cca2"
+      );
+      const n = data
+        .map((country: any) => country.name.common)
+        .sort((a: string, b: string) => a.localeCompare(b));
       setNationalities(n);
     };
     fetchNationalities();
     setNationalities(nationalities);
-  }, []); 
+  }, []);
   return nationalities;
 }

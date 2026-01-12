@@ -13,7 +13,18 @@ export interface UserBase {
   nationality: string;
 }
 
+export interface UserCreate extends UserBase{
+  role: Role;
+  identificationType: IdentificationType;
+}
+
 export interface UserResponse extends UserBase {
+  id?: number;
+  role: Role;
+  identificationType: IdentificationType;
+}
+
+export interface UserDetails extends UserBase{
   id?: number;
   role: Role;
   identificationType: IdentificationType;
@@ -21,7 +32,11 @@ export interface UserResponse extends UserBase {
 
 export interface UserRequest extends UserBase{
   id: number; 
-  email: string;
+  roleId: number;
+  identificationTypeId: number;
+}
+
+export interface UserCreateRequest extends UserBase {
   roleId: number;
   identificationTypeId: number;
 }
@@ -32,14 +47,22 @@ export interface UserUpdateRequest extends Partial<UserBase> {
 }
 
 // User Payload Interfaces
-export interface UserUpdatePayload {
-  email: string;
+export interface UserPayloadBase {
   first_name: string;
   last_name: string;
   id_number: string;
   phone_number: string;
+  email: string;
   address: string;
-  nationality: string; 
+  nationality: string;
+}
+
+export interface UserCreatePayload extends UserPayloadBase {
+  role_id: number;
+  identification_type_id: number;
+}
+
+export interface UserUpdatePayload extends UserPayloadBase {
   role_id: number;
   identification_type_id: number;
 }
