@@ -2,8 +2,27 @@ from core.db import get_connection
 from models.user import UserGet, UserUpdate, UserCreate
 from models.role import Role
 from models.identification_type import IdentificationType
-from repositories.user_queries import UPDATE_USER_QUERY, FETCH_USER_BY_ID_QUERY, FETCH_USERS_QUERY, CREATE_USER_QUERY, EMAIL_OR_ID_EXISTS_QUERY
+from repositories.user_queries import *
 from fastapi import HTTPException
+
+def delete_user_by_id(user_id: int):
+    conn = get_connection()
+    cur = None
+    try: 
+        cur = conn.cursor()
+        print("Deleting user with ID:", user_id)
+        query = DELETE_USER_QUERY
+        cur.execute(query, (user_id,))
+        conn.commit() 
+        return True
+    except Exception as e:
+        print("Error deleting user:", e)
+        translate_error(e)
+    finally:
+        print("Closing connection after deleting user")
+        cur.close()
+        conn.close()
+    
 
 def update_user(user_id: int, user_data: UserUpdate):
     conn = get_connection()

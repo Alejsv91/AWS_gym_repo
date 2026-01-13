@@ -1,5 +1,6 @@
 import { useApi } from "./api";
 import { useEffect, useState } from "react";
+import { NATIONALITIES_ENDPOINT } from "../constants/endpoints";
 
 export function useFetchNationalities() {
   const api = useApi();
@@ -8,7 +9,7 @@ export function useFetchNationalities() {
   useEffect(() => {
     const fetchNationalities = async () => {
       const { data } = await api.get(
-        "https://restcountries.com/v3.1/all?fields=name,cca2"
+        NATIONALITIES_ENDPOINT.getNationalities
       );
       const n = data
         .map((country: any) => country.name.common)

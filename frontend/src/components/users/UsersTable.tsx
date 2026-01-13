@@ -1,13 +1,14 @@
-import { useUsers } from "../../services/userService";
+import { useUsers, useDeleteUser } from "../../services/userService";
 import { Link } from "react-router-dom";
 import { PATHS } from "../../constants/paths";
 import { useNavigate } from "react-router-dom";
 import { UserActions } from "../../constants/userActions";
 
 const UsersTable = () => {
-  const users = useUsers();
+  const { users, refetch } = useUsers();
   const userDetailsRoute = PATHS.USER_DETAILS;
   const navigate = useNavigate();
+  const deleteUser = useDeleteUser();
 
   return (
     <>
@@ -46,7 +47,12 @@ const UsersTable = () => {
                     >
                       Edit
                     </Link>
-                    <button className="btn btn-sm btn-outline-danger">
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => {
+                        deleteUser(user.id!.toString()).then(() => refetch());
+                      }}
+                    >
                       Eliminar
                     </button>
                   </td>
