@@ -20,6 +20,11 @@ export function useDeleteUser() {
   const deleteUser = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       const result = await api.delete(USER_ENDPOINT.deleteUser(id));
+      if (result.status !== 200) {
+        console.error("Failed to delete user:", result.status, result.data);
+        alert("Failed to delete user.");
+        return false;
+      }
       console.log("Delete user result:", result);
       alert("User deleted successfully!");
       return result;
