@@ -14,19 +14,39 @@ import {
 } from "../utils/mappers";
 import { AxiosError } from "axios";
 
+export function useDeleteUser() {
+  const api = useApi();
+
+  const deleteUser = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      const result = await api.delete(USER_ENDPOINT.deleteUser(id));
+      if (result.status !== 200) {
+        console.error("Failed to delete user:", result.status, result.data);
+        alert("Failed to delete user.");
+        return false;
+      }
+      console.log("Delete user result:", result);
+      alert("User deleted successfully!");
+      return result;
+    }
+    return false;
+  };
+  return deleteUser;
+}
+
 export function useUsers() {
   const api = useApi();
   const [users, setUsers] = useState<UserResponse[]>([]);
 
+  const fetchUsers = async () => {
+    const { data } = await api.get(USER_ENDPOINT.getUsers);
+    const mappedUsers = data.map(mapUser);
+    setUsers(mappedUsers);
+  };
   useEffect(() => {
-    const fetchUsers = async () => {
-      const { data } = await api.get(USER_ENDPOINT.getUsers);
-      const mappedUsers = data.map(mapUser);
-      setUsers(mappedUsers);
-    };
     fetchUsers();
   }, []);
-  return users;
+  return { users, refetch: fetchUsers };
 }
 
 export function useFetchUserById(id: string) {

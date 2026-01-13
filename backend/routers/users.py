@@ -1,7 +1,7 @@
 from fastapi.security import HTTPBearer
 from fastapi import APIRouter, Depends
 from core.auth import get_current_user
-from services.users_service import fetch_users, fetch_user_by_id, update_user, create_user
+from services.users_service import *
 from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
 
@@ -39,3 +39,14 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 @router.post("/", response_model=UserGet, status_code=201)
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
         return create_user(user_data)
+    
+@router.delete("/{user_id}", status_code=204)
+def delete_user(user_id: int, user=Depends(get_current_user)):
+    try:
+        currentUser = fetch_user_by_id(user_id)
+        if not currentUser:
+            raise HTTPException(status_code=404, detail="User not found")
+        delete_user_by_id(user_id)
+        return {"message": f"User {currentUser.first_name} deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while deleting the user: " + str(e))

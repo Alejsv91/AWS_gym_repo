@@ -14,6 +14,8 @@ VALUES
 RETURNING id;
 """
 
+DELETE_USER_QUERY = """DELETE FROM users WHERE id = %s;"""
+
 UPDATE_USER_QUERY = """UPDATE users
                 SET first_name = %s, 
                 last_name = %s, 

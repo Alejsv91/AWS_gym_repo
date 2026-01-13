@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
-import { useState, useEffect, use } from "react";
-import { UserCreate, UserResponse, UserDetails } from "../../interfaces/users";
+import { useState, useEffect } from "react";
+import {  UserResponse, UserDetails } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "./saveModalUsers";
 import { useUpdateUser, useCreateUser } from "../../services/userService";
