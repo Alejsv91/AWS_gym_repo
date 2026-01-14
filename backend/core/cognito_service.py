@@ -20,3 +20,12 @@ def create_cognito_user(email: str, temp_password: str):
         return response
     except ClientError as e:
         raise Exception(f"Failed to create user: {e.response['Error']['Message']}")
+
+def delete_cognito_user(username: str):
+    try:
+        COGNITO.admin_delete_user(
+            UserPoolId=USER_POOL_ID,
+            Username=username
+        )
+    except ClientError as e:
+        raise Exception(f"Failed to delete user: {e.response['Error']['Message']}")
