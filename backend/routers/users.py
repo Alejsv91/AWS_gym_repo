@@ -6,7 +6,6 @@ from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
 
 security = HTTPBearer()
-
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=list[UserGet], status_code=200)
