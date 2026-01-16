@@ -26,15 +26,26 @@ def get_user_by_id(user_id: int, user=Depends(get_current_user)):
 @router.put("/{user_id}", response_model=UserGet, status_code=200)
 def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_current_user)):
     try: 
-        currentUser= fetch_user_by_id(user_id)
+        currentUser = fetch_user_by_id(user_id)
         if not currentUser:
             raise HTTPException(status_code=404, detail="User not found")
+
+        if currentUser.email != user_data.email:
+            raise HTTPException(status_code=400, detail="Email cannot be changed")
+
         update_user(user_id, user_data)
         updated_user = fetch_user_by_id(user_id)
         print("Updated user:", updated_user)
         return updated_user
+
+    except HTTPException:
+        raise
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while updating the user: " + str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while updating the user: " + str(e)
+        )
 
 @router.post("/", response_model=UserGet, status_code=201)
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
