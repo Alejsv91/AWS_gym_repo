@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useFetchNationalities } from "../../services/nationalityService";
 import { useRoles } from "../../services/roleService";
 import { useState, useEffect } from "react";
-import {  UserResponse, UserDetails } from "../../interfaces/users";
+import { UserResponse, UserDetails } from "../../interfaces/users";
 import { mapDropdownOption } from "../../utils/mappers";
 import SaveModalUsers from "./saveModalUsers";
 import { useUpdateUser, useCreateUser } from "../../services/userService";
@@ -13,6 +13,7 @@ import {
 } from "../../services/identificationType";
 import { useFetchUserById } from "../../services/userService";
 import { UserActions } from "../../constants/userActions";
+import { isEditable, isVisible } from "@testing-library/user-event/dist/utils";
 
 interface FormUsersProps {
   userId?: string;
@@ -48,6 +49,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
         firstName: "",
         lastName: "",
         email: "",
+        emailConfirmation: "",
         identificationNumber: "",
         phoneNumber: "",
         address: "",
@@ -62,12 +64,37 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
   const inputs = [
     {
+      label:
+        formUserProps.userAction === USER_ACTIONS.CREATE
+          ? "Email (this field is permanent and cannot be updated in the future)"
+          : "Email",
+      value: userDetails ? userDetails.email : "",
+      type: "email",
+      id: "email",
+      updateFunction: updateInputValue,
+      validationFunction: validateEmail,
+      isEditable: formUserProps.userAction === USER_ACTIONS.CREATE,
+      isVisible: true,
+    },
+    {
+      label: "Confirm email",
+      value: userDetails ? userDetails.emailConfirmation || "" : "",
+      type: "email",
+      id: "emailConfirmation",
+      updateFunction: updateInputValue,
+      validationFunction: emailConfirmation,
+      isEditable: formUserProps.userAction === USER_ACTIONS.CREATE,
+      isVisible: formUserProps.userAction === USER_ACTIONS.CREATE,
+    },
+    {
       label: "First Name",
       value: userDetails ? userDetails.firstName : "",
       type: "text",
       id: "firstName",
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
+      isEditable: true,
+      isVisible : true,
     },
     {
       label: "Last Name",
@@ -76,14 +103,8 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "lastName",
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
-    },
-    {
-      label: "Email",
-      value: userDetails ? userDetails.email : "",
-      type: "email",
-      id: "email",
-      updateFunction: updateInputValue,
-      validationFunction: validateEmail,
+      isEditable: true,
+      isVisible : true,
     },
     {
       label: "Identification Number",
@@ -92,6 +113,8 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "identificationNumber",
       updateFunction: updateInputValue,
       validationFunction: validateIdNumber,
+      isEditable: true,
+      isVisible : true,
     },
     {
       label: "Phone Number",
@@ -100,6 +123,8 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "phoneNumber",
       updateFunction: updateInputValue,
       validationFunction: validatePhone,
+      isEditable: true,
+      isVisible: true,
     },
     {
       label: "Address",
@@ -107,6 +132,8 @@ export default function FormUser(formUserProps: FormUsersProps) {
       type: "text",
       id: "address",
       updateFunction: updateInputValue,
+      isEditable: true,
+      isVisible: true,
     },
   ];
 
@@ -154,6 +181,12 @@ export default function FormUser(formUserProps: FormUsersProps) {
   function validateEmail(email: string) {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email) ? "" : "Invalid email format.";
+  }
+
+  function emailConfirmation(email: string) {
+    return userDetails?.email !== "" && userDetails?.email !== email
+      ? "Emails do not match."
+      : "";
   }
 
   function validatePhone(phone: string) {
@@ -245,12 +278,13 @@ export default function FormUser(formUserProps: FormUsersProps) {
             </select>
           </div>
         ))}
-        {inputs.map((input, index) => (
+        {inputs.map((input, index) => input?.isVisible ? (
           <div className="mb-3" key={index}>
             <label className="form-label">{input.label}</label>
             <input
               id={input.id}
               type={input.type}
+              disabled={input.isEditable === false}
               className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
               value={input.value}
               onChange={
@@ -264,7 +298,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
               <div className="invalid-feedback">{errors[input.id]}</div>
             )}
           </div>
-        ))}
+        ): null)}
         <div className="mb-3">
           <button
             type="button"
