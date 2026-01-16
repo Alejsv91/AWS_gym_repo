@@ -13,6 +13,7 @@ import {
 } from "../../services/identificationType";
 import { useFetchUserById } from "../../services/userService";
 import { UserActions } from "../../constants/userActions";
+import { isEditable } from "@testing-library/user-event/dist/utils";
 
 interface FormUsersProps {
   userId?: string;
@@ -62,12 +63,22 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
   const inputs = [
     {
+      label: formUserProps.userAction === USER_ACTIONS.CREATE? "Email (this field is permanent and cannot be updated in the future)":"Email",
+      value: userDetails ? userDetails.email : "",
+      type: "email",
+      id: "email",
+      updateFunction: updateInputValue,
+      validationFunction: validateEmail,
+      isEditable: formUserProps.userAction === USER_ACTIONS.CREATE,
+    },
+    {
       label: "First Name",
       value: userDetails ? userDetails.firstName : "",
       type: "text",
       id: "firstName",
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
+      isEditable: true,
     },
     {
       label: "Last Name",
@@ -76,14 +87,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "lastName",
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
-    },
-    {
-      label: "Email",
-      value: userDetails ? userDetails.email : "",
-      type: "email",
-      id: "email",
-      updateFunction: updateInputValue,
-      validationFunction: validateEmail,
+      isEditable: true,
     },
     {
       label: "Identification Number",
@@ -92,6 +96,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "identificationNumber",
       updateFunction: updateInputValue,
       validationFunction: validateIdNumber,
+      isEditable: true,
     },
     {
       label: "Phone Number",
@@ -100,6 +105,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       id: "phoneNumber",
       updateFunction: updateInputValue,
       validationFunction: validatePhone,
+      isEditable: true,
     },
     {
       label: "Address",
@@ -107,6 +113,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       type: "text",
       id: "address",
       updateFunction: updateInputValue,
+      isEditable: true
     },
   ];
 
@@ -251,6 +258,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
             <input
               id={input.id}
               type={input.type}
+              disabled={input.isEditable === false}
               className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
               value={input.value}
               onChange={
