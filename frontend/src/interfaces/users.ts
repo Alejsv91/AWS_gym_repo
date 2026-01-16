@@ -28,6 +28,7 @@ export interface UserDetails extends UserBase{
   id?: number;
   role: Role;
   identificationType: IdentificationType;
+  emailConfirmation?: string;
 }
 
 export interface UserRequest extends UserBase{
