@@ -43,7 +43,7 @@ def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
         print("Cognito response:", cognito_response)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))
-    cognito_id = cognito_response['User']['Username']
+    cognito_id = cognito_response.username
     print("Cognito user created with ID:", cognito_id)
     return create_user(user_data, cognito_id)
     

@@ -46,7 +46,8 @@ FETCH_USER_BY_ID_QUERY = """
         r.description AS role_description,
         it.id AS identification_type_id,
         it.name AS identification_type_name,
-        it.description AS identification_type_description
+        it.description AS identification_type_description,
+        u.cognito_id
         FROM users u
         JOIN roles r ON u.role_id = r.id
         JOIN identification_type it ON u.identification_type_id = it.id

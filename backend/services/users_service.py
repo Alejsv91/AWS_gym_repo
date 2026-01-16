@@ -63,11 +63,13 @@ def create_user(user_data: UserCreate, cognito_id: str):
         print("Executed create user with values:", values)
         new_id = cur.fetchone()[0]
         conn.commit()
+        print("User created with ID:", new_id)
         return fetch_user_by_id(new_id)
     except Exception as e:
         print("Error creating user:", e)
         translate_error(e)
         delete_cognito_user(username=cognito_id)
+        raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))
     finally:
         print("Closing connection after creating user")
         cur.close()
