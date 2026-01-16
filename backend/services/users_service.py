@@ -4,6 +4,10 @@ from models.role import Role
 from models.identification_type import IdentificationType
 from repositories.user_queries import *
 from fastapi import HTTPException
+import os
+from core.cognito_service import delete_cognito_user 
+
+USER_POOL_ID = os.getenv("USERPOOL_ID")
 
 def delete_user_by_id(user_id: int):
     conn = get_connection()
@@ -46,7 +50,7 @@ def update_user(user_id: int, user_data: UserUpdate):
         cur.close()
         conn.close()
 
-def create_user(user_data: UserCreate):
+def create_user(user_data: UserCreate, cognito_id: str):
     conn = get_connection()
     try:
         print('Creating user with data:', user_data)
@@ -54,15 +58,18 @@ def create_user(user_data: UserCreate):
         query = CREATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id,
                   user_data.id_number, user_data.phone_number, user_data.email,
-                  user_data.address, user_data.role_id, user_data.nationality)
+                  user_data.address, user_data.role_id, user_data.nationality, cognito_id)
         cur.execute(query, values)
         print("Executed create user with values:", values)
         new_id = cur.fetchone()[0]
         conn.commit()
+        print("User created with ID:", new_id)
         return fetch_user_by_id(new_id)
     except Exception as e:
         print("Error creating user:", e)
         translate_error(e)
+        delete_cognito_user(username=cognito_id)
+        raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))
     finally:
         print("Closing connection after creating user")
         cur.close()
@@ -131,7 +138,8 @@ def create_user_object(row) -> UserGet:
         address=row[6],
         nationality=row[7], 
         role=role,
-        identification_type=identification_type
+        identification_type=identification_type,
+        cognito_id=row[14]
     )
     print("User created:", user)
     return user

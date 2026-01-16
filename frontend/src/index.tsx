@@ -5,12 +5,13 @@ import App from "./App";
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+  authority: process.env.REACT_APP_COGNITO_AUTHORITY,
   client_id: process.env.REACT_APP_COGNITO_CLIENT_ID,
-  redirect_uri: "http://localhost:3000",
+  redirect_uri: process.env.REACT_APP_COGNITO_REDIRECT_URI,
   response_type: "code",
-  scope: "email openid phone",
+  scope: "email openid phone profile",
 };
+console.log("cognitoAuthConfig:", cognitoAuthConfig)
 
 const root = ReactDOM.createRoot(
   document.getElementById("root")!   // 👈 asegura que no es null

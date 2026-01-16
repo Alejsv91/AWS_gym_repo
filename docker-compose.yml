@@ -21,4 +21,10 @@ services:
     ports:
       - "8000:8000"
     command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - COGNITO_REGION=${COGNITO_REGION}
+      - USERPOOL_ID=${USERPOOL_ID}
     

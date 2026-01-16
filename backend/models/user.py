@@ -23,3 +23,4 @@ class UserGet(UserBase):
     id: int
     role: Role
     identification_type: IdentificationType
+    cognito_id: str

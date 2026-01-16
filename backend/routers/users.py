@@ -4,9 +4,9 @@ from core.auth import get_current_user
 from services.users_service import *
 from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
+from core.cognito_service import create_cognito_user
 
 security = HTTPBearer()
-
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=list[UserGet], status_code=200)
@@ -38,7 +38,14 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 
 @router.post("/", response_model=UserGet, status_code=201)
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
-        return create_user(user_data)
+    try: 
+        cognito_response = create_cognito_user(email=user_data.email, temp_password=f"TempPass123!")
+        print("Cognito response:", cognito_response)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))
+    cognito_id = cognito_response.username
+    print("Cognito user created with ID:", cognito_id)
+    return create_user(user_data, cognito_id)
     
 @router.delete("/{user_id}", status_code=204)
 def delete_user(user_id: int, user=Depends(get_current_user)):

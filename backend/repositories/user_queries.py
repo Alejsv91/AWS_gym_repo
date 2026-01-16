@@ -8,9 +8,12 @@ phone_number,
 email, 
 address, 
 role_id, 
-nationality)
+nationality,
+cognito_id,
+created_at,
+updated_at)
 VALUES
-(%s, %s, %s, %s, %s, %s, %s, %s, %s)
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
 RETURNING id;
 """
 
@@ -43,7 +46,8 @@ FETCH_USER_BY_ID_QUERY = """
         r.description AS role_description,
         it.id AS identification_type_id,
         it.name AS identification_type_name,
-        it.description AS identification_type_description
+        it.description AS identification_type_description,
+        u.cognito_id
         FROM users u
         JOIN roles r ON u.role_id = r.id
         JOIN identification_type it ON u.identification_type_id = it.id
@@ -54,7 +58,7 @@ FETCH_USERS_QUERY = """
             u.id, u.first_name, u.last_name, u.id_number, u.phone_number,
             u.email, u.address, u.nationality,
             r.id, r.name, r.description,
-            it.id, it.name, it.description
+            it.id, it.name, it.description, u.cognito_id
         FROM users u
         JOIN roles r ON u.role_id = r.id
         JOIN identification_type it ON u.identification_type_id = it.id;
