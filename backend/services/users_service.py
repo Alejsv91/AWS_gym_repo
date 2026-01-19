@@ -13,17 +13,20 @@ def delete_user_by_id(user_id: int):
     conn = get_connection()
     cur = None
     try: 
+        print("-----------  ------------")
         cur = conn.cursor()
-        print("Deleting user with ID:", user_id)
+        print(f"Starting process to delete user with ID:{user_id}")
         query = DELETE_USER_QUERY
         cur.execute(query, (user_id,))
         conn.commit() 
+        print(f"User with ID deleted: {user_id}")
         return True
     except Exception as e:
         print("Error deleting user:", e)
         translate_error(e)
     finally:
         print("Closing connection after deleting user")
+        print("-----------  ------------")
         cur.close()
         conn.close()
     
@@ -78,18 +81,20 @@ def create_user(user_data: UserCreate, cognito_id: str):
 def fetch_user_by_id(user_id: int):
     conn = get_connection()
     try: 
-        print("Fetching user by ID:", user_id)
+        print("---------------")
+        print(f"Fetching user by ID:{user_id}")
         cur = conn.cursor()
         query = FETCH_USER_BY_ID_QUERY
         cur.execute(query, (user_id,))
         print("Executed query to fetch user by ID")
         row = cur.fetchone()
         user = create_user_object(row)
-        print("Fetched user:", user)
+        print(f"Fetched user:{user}")
+        print("---------------")
         return user
     except Exception as e:
-        print("Error fetching user by ID:", e)
-        raise HTTPException(status_code=500, detail="An error occurred while fetching the user: " + str(e))
+        print(f"Error fetching user by ID: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred while fetching the user: {str(e)}")
     finally:
         print("Closing connection after fetching user by ID")
         cur.close()

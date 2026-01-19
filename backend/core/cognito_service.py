@@ -14,11 +14,11 @@ def create_cognito_user(email: str, temp_password: str):
             UserPoolId=USER_POOL_ID,
             Username=email,
             TemporaryPassword=temp_password,
-            MessageAction='SUPPRESS',
             UserAttributes=[
                 {'Name': 'email', 'Value': email},
                 {'Name': 'email_verified', 'Value': 'True'}
-            ]
+            ],
+            DesiredDeliveryMediums=['EMAIL']
         )
         print("Created Cognito user:", response)
         return CognitoUser(
@@ -32,9 +32,12 @@ def create_cognito_user(email: str, temp_password: str):
 
 def delete_cognito_user(username: str):
     try:
+        print("-------------/nStarting process to delete Cognito user with username:", username)
         COGNITO.admin_delete_user(
             UserPoolId=USER_POOL_ID,
             Username=username
         )
+        print(f"Deleted Cognito user with username:{username} Completed/n-------------")
+        return True
     except ClientError as e:
         raise Exception(f"Failed to delete user: {e.response['Error']['Message']}")

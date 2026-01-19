@@ -4,7 +4,8 @@ from core.auth import get_current_user
 from services.users_service import *
 from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
-from core.cognito_service import create_cognito_user
+from core.cognito_service import *
+from utils.security import *
 
 security = HTTPBearer()
 router = APIRouter(prefix="/users", tags=["users"])
@@ -50,7 +51,8 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 @router.post("/", response_model=UserGet, status_code=201)
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     try: 
-        cognito_response = create_cognito_user(email=user_data.email, temp_password=f"TempPass123!")
+        password = generate_random_password()
+        cognito_response = create_cognito_user(email=user_data.email, temp_password=password)
         print("Cognito response:", cognito_response)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))
@@ -60,10 +62,15 @@ def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     
 @router.delete("/{user_id}", status_code=204)
 def delete_user(user_id: int, user=Depends(get_current_user)):
+
+    currentUser = fetch_user_by_id(user_id)
+    if not currentUser:
+        raise HTTPException(status_code=404, detail="User not found")
     try:
-        currentUser = fetch_user_by_id(user_id)
-        if not currentUser:
-            raise HTTPException(status_code=404, detail="User not found")
+        delete_cognito_user(currentUser.cognito_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while deleting the Cognito user: " + str(e))
+    try:    
         delete_user_by_id(user_id)
         return {"message": f"User {currentUser.first_name} deleted successfully"}
     except Exception as e:
