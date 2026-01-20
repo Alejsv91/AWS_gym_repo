@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../constants/Routes";
+import { useAuthActions } from "../utils/auth";
 
 const Navbar: React.FC = () => {
+  const { logout } = useAuthActions();
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
@@ -27,17 +29,15 @@ const Navbar: React.FC = () => {
         {/* Links */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            {ROUTES.filter(r => r.showInNav).map((route)=>(
-                <li className="nav-item" key={route.path}>
-                    <Link className="nav-link" to={route.path}>
-                    {route.label}
-                    </Link>
-                </li>                            
+            {ROUTES.filter((r) => r.showInNav).map((route) => (
+              <li className="nav-item" key={route.path}>
+                <Link className="nav-link" to={route.path}>
+                  {route.label}
+                </Link>
+              </li>
             ))}
-            <li className="nav-item">
-              <Link className="nav-link" to="/logout">
-                Logout
-              </Link>
+            <li className="nav-item" onClick={logout}>
+              <button className="nav-link">Logout</button>
             </li>
           </ul>
         </div>
