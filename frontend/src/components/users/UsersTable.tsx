@@ -3,14 +3,18 @@ import { Link } from "react-router-dom";
 import { PATHS } from "../../constants/paths";
 import { useNavigate } from "react-router-dom";
 import { UserActions } from "../../constants/userActions";
+import LoadingModal from "../Loading";
+import { useEffect, useState } from "react";
 
 const UsersTable = () => {
-  const { users, refetch } = useUsers();
+  const { users, refetch, isLoading } = useUsers();
   const userDetailsRoute = PATHS.USER_DETAILS;
   const navigate = useNavigate();
   const deleteUser = useDeleteUser();
 
-  return (
+  return isLoading ? (
+    <LoadingModal isLoading={isLoading} />
+  ) : (
     <>
       <div className="container mt-5">
         <h2 className="mb-4 text-center">Users</h2>

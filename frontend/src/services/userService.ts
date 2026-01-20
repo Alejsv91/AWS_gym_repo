@@ -37,16 +37,19 @@ export function useDeleteUser() {
 export function useUsers() {
   const api = useApi();
   const [users, setUsers] = useState<UserResponse[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchUsers = async () => {
+    setIsLoading(true);
     const { data } = await api.get(USER_ENDPOINT.getUsers);
     const mappedUsers = data.map(mapUser);
     setUsers(mappedUsers);
+    setIsLoading(false);
   };
   useEffect(() => {
     fetchUsers();
   }, []);
-  return { users, refetch: fetchUsers };
+  return { users, refetch: fetchUsers, isLoading };
 }
 
 export function useFetchUserById(id: string) {
