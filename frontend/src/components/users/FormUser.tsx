@@ -13,7 +13,7 @@ import {
 } from "../../services/identificationType";
 import { useFetchUserById } from "../../services/userService";
 import { UserActions } from "../../constants/userActions";
-import { isEditable, isVisible } from "@testing-library/user-event/dist/utils";
+import LoadingModal from "../Loading";
 
 interface FormUsersProps {
   userId?: string;
@@ -25,7 +25,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const userInfo = useFetchUserById(id!);
   const [showModal, setShowModal] = useState(false);
   const rawNationalities = useFetchNationalities() || [];
-  const roles = useRoles() || [];
+  const { roles } = useRoles() || [];
   const idTypes = useFetchIdentificationTypes() || [];
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
   const loading =
@@ -94,7 +94,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Last Name",
@@ -104,7 +104,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Identification Number",
@@ -114,7 +114,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateIdNumber,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Phone Number",
@@ -278,27 +278,31 @@ export default function FormUser(formUserProps: FormUsersProps) {
             </select>
           </div>
         ))}
-        {inputs.map((input, index) => input?.isVisible ? (
-          <div className="mb-3" key={index}>
-            <label className="form-label">{input.label}</label>
-            <input
-              id={input.id}
-              type={input.type}
-              disabled={input.isEditable === false}
-              className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
-              value={input.value}
-              onChange={
-                input.updateFunction
-                  ? (e) =>
-                      input.updateFunction(e, input.id as keyof UserResponse)
-                  : undefined
-              }
-            />
-            {errors[input.id] && (
-              <div className="invalid-feedback">{errors[input.id]}</div>
-            )}
-          </div>
-        ): null)}
+        {inputs.map((input, index) =>
+          input?.isVisible ? (
+            <div className="mb-3" key={index}>
+              <label className="form-label">{input.label}</label>
+              <input
+                id={input.id}
+                type={input.type}
+                disabled={input.isEditable === false}
+                className={`form-control ${
+                  errors[input.id] ? "is-invalid" : ""
+                }`}
+                value={input.value}
+                onChange={
+                  input.updateFunction
+                    ? (e) =>
+                        input.updateFunction(e, input.id as keyof UserResponse)
+                    : undefined
+                }
+              />
+              {errors[input.id] && (
+                <div className="invalid-feedback">{errors[input.id]}</div>
+              )}
+            </div>
+          ) : null
+        )}
         <div className="mb-3">
           <button
             type="button"

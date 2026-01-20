@@ -1,9 +1,12 @@
 import { useRoles } from "../../services/roleService";
+import LoadingModal from "../Loading";
 
 const RolesTable: React.FC = () => {
-  const roles = useRoles();
+  const { roles, isLoading } = useRoles();
 
-  return (
+  return isLoading ? (
+    <LoadingModal isLoading />
+  ) : (
     <div className="container mt-5">
       <h2 className="mb-4 text-center">Roles List</h2>
       <div className="table-responsive">

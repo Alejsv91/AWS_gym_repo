@@ -4,7 +4,6 @@ import { PATHS } from "../../constants/paths";
 import { useNavigate } from "react-router-dom";
 import { UserActions } from "../../constants/userActions";
 import LoadingModal from "../Loading";
-import { useEffect, useState } from "react";
 
 const UsersTable = () => {
   const { users, refetch, isLoading } = useUsers();
