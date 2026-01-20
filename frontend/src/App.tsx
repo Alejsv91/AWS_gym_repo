@@ -10,19 +10,11 @@ import LandingPage from "./pages/LandingPages";
 import Navbar from "./components/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ROUTES } from "./constants/Routes";
+import { useAuthActions } from "./utils/auth";
 
 function App() {
   const auth = useAuth();
-
-  //SCRUM-28
-  const signOutRedirect = () => {
-    const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
-    const logoutUri = "<logout uri>";
-    const cognitoDomain = process.env.REACT_APP_COGNITO_USER_POOL_ID;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
-    )}`;
-  };
+  const { login } = useAuthActions();
 
   if (auth.isLoading) {
     return <div>Loading...</div>;
@@ -53,7 +45,7 @@ function App() {
                 <h1>Please log in</h1>
                 <button
                   className="btn btn-primary"
-                  onClick={() => auth.signinRedirect()}
+                  onClick={login}
                 >
                   Login
                 </button>
