@@ -32,7 +32,10 @@ export default function FormUser(formUserProps: FormUsersProps) {
     nationalities.length === 0 || roles.length === 0 || idTypes.length === 0;
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-  const updateUser = useUpdateUser(id!, userDetails!);
+  const { updateUser, isUpdating, updateMessage } = useUpdateUser(
+    id!,
+    userDetails!
+  );
   const { createUser, isCreatingUser, loadingMessage } = useCreateUser(
     userDetails!
   );
@@ -42,16 +45,22 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const [actionMessage, setActionMessage] = useState("");
 
   useEffect(() => {
-    setActionMessage(loadingMessage);
-  }, [loadingMessage]);
+    if (isCreatingUser) {
+      setActionMessage(loadingMessage);
+      return;
+    } else if (isUpdating) {
+      setActionMessage(updateMessage);
+      return;
+    }
+  }, [loadingMessage, updateMessage]);
 
   useEffect(() => {
-    if (isCreatingUser || loading) {
+    if (isCreatingUser || loading || isUpdating) {
       setIsLoading(true);
     } else {
       setIsLoading(false);
     }
-  }, [isCreatingUser, loading]);
+  }, [isCreatingUser, loading, isUpdating]);
 
   useEffect(() => {
     if (userInfo) {

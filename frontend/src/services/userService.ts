@@ -75,8 +75,12 @@ export function useUpdateUser(
   userData: Partial<UserUpdateRequest>
 ) {
   const api = useApi();
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updateMessage, setUpdateMessage] = useState<string>("");
   const updateUser = async () => {
     try {
+      setIsUpdating(true);
+      setUpdateMessage("Updating user, please wait...");
       const response = await api.put(
         USER_ENDPOINT.updateUser(id),
         toUserUpdateRequest(userData as UserResponse)
@@ -85,6 +89,8 @@ export function useUpdateUser(
         console.error("Failed to update user:", response.status, response.data);
         throw new Error(`Update failed with status ${response.status}`);
       }
+      setIsUpdating(false);
+      setUpdateMessage("User udpated successfully!");
       alert("Changes saved!");
       return true;
     } catch (error: AxiosError | any) {
@@ -92,7 +98,7 @@ export function useUpdateUser(
     }
   };
   console.log("useUpdateUser called with:", id, userData);
-  return updateUser;
+  return {updateUser, isUpdating, updateMessage };
 }
 
 export function useCreateUser(userData: Partial<UserCreateRequest>) {
