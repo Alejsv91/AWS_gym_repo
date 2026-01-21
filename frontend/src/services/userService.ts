@@ -96,9 +96,13 @@ export function useUpdateUser(
 }
 
 export function useCreateUser(userData: Partial<UserCreateRequest>) {
+  const [isCreatingUser, setIsCreatignUser] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
   const api = useApi();
   const createUser = async () => {
     try {
+      setIsCreatignUser(true);
+      setLoadingMessage("Creating user, please wait...");
       const response = await api.post(
         USER_ENDPOINT.createUser,
         toCreateUserRequest(userData as UserCreate)
@@ -108,12 +112,14 @@ export function useCreateUser(userData: Partial<UserCreateRequest>) {
         throw new Error(`Creation failed with status ${response.status}`);
       }
       alert("User created successfully!");
-      return true;
+      setIsCreatignUser(false);
+      setLoadingMessage(`User ${response.data.username} created successfully!`);
     } catch (error: AxiosError | any) {
+      setIsCreatignUser(false);
       getErrorMessage(error);
     }
   };
-  return createUser;
+  return { createUser, isCreatingUser, loadingMessage };
 }
 
 function getErrorMessage(error: AxiosError | any) {

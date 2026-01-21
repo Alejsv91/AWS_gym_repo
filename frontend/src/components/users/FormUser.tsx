@@ -33,9 +33,25 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const updateUser = useUpdateUser(id!, userDetails!);
-  const createUser = useCreateUser(userDetails!);
+  const { createUser, isCreatingUser, loadingMessage } = useCreateUser(
+    userDetails!
+  );
   const USER_ACTIONS = UserActions;
   const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [actionMessage, setActionMessage] = useState("");
+
+  useEffect(() => {
+    setActionMessage(loadingMessage);
+  }, [loadingMessage]);
+
+  useEffect(() => {
+    if (isCreatingUser || loading) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [isCreatingUser, loading]);
 
   useEffect(() => {
     if (userInfo) {
@@ -252,11 +268,10 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
     setShowModal(false); // close modal after saving
   };
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
-  return (
+  return isLoading ? (
+    LoadingModal({ isLoading, actionMessage })
+  ) : (
     <div className="container mt-4">
       <h2>User Details</h2>
       <form className="border p-3 rounded bg-light">

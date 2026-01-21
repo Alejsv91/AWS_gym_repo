@@ -1,8 +1,9 @@
 interface LoadingProps {
   isLoading: boolean;
+  actionMessage?: string;
 }
 
-export default function LoadingModal({ isLoading }: LoadingProps) {
+export default function LoadingModal({ isLoading, actionMessage }: LoadingProps) {
   if (!isLoading) return null;
 
   return (
@@ -17,7 +18,7 @@ export default function LoadingModal({ isLoading }: LoadingProps) {
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
-              <p className="mt-3">Loading, please wait...</p>
+              <p className="mt-3">{actionMessage ? actionMessage : "Working on it, please wait..."} </p>
             </div>
           </div>
         </div>
