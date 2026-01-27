@@ -7,7 +7,7 @@ import os
 COGNITO = boto3.client('cognito-idp', region_name=os.getenv("COGNITO_REGION"))
 USER_POOL_ID = os.getenv("USERPOOL_ID")
 
-def create_cognito_user(email: str, temp_password: str):
+def create_cognito_user(role_id: int, email: str, temp_password: str):
     print("Creating Cognito user with email:", email)
     try:
         response = COGNITO.admin_create_user(
@@ -16,7 +16,8 @@ def create_cognito_user(email: str, temp_password: str):
             TemporaryPassword=temp_password,
             UserAttributes=[
                 {'Name': 'email', 'Value': email},
-                {'Name': 'email_verified', 'Value': 'True'}
+                {'Name': 'email_verified', 'Value': 'True'},
+                {'Name': 'custom:role_id', 'Value': str(role_id)}
             ],
             DesiredDeliveryMediums=['EMAIL']
         )

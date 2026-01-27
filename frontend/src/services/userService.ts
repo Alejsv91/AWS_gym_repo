@@ -16,22 +16,32 @@ import { AxiosError } from "axios";
 
 export function useDeleteUser() {
   const api = useApi();
-
+  const [deleteMessage, setDeleteMessage] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const deleteUser = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      const result = await api.delete(USER_ENDPOINT.deleteUser(id));
-      if (result.status !== 204) {
-        console.error("Failed to delete user:", result.status, result.data);
-        alert("Failed to delete user.");
-        return false;
+    try{
+      if (window.confirm("Are you sure you want to delete this user?")) {
+        setIsDeleting(true);
+        setDeleteMessage("Deleting user, please wait...");
+        const result = await api.delete(USER_ENDPOINT.deleteUser(id));
+        if (result.status !== 204) {
+          console.error("Failed to delete user:", result.status, result.data);
+          alert("Failed to delete user.");
+          return false;
+        }
+        console.log("Delete user result:", result);
+        setIsDeleting(false);
+        setDeleteMessage("User deleted successfully!");
+        alert("User deleted successfully!");
+        return result;
       }
-      console.log("Delete user result:", result);
-      alert("User deleted successfully!");
-      return result;
+      return false;
     }
-    return false;
+    catch(error: AxiosError | any){
+      getErrorMessage(error);
+    }    
   };
-  return deleteUser;
+  return {deleteUser, deleteMessage, isDeleting };
 }
 
 export function useUsers() {

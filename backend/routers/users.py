@@ -52,7 +52,7 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     try: 
         password = generate_random_password()
-        cognito_response = create_cognito_user(email=user_data.email, temp_password=password)
+        cognito_response = create_cognito_user(role_id=user_data.role_id ,email=user_data.email, temp_password=password)
         print("Cognito response:", cognito_response)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))

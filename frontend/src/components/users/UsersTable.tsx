@@ -4,15 +4,21 @@ import { PATHS } from "../../constants/paths";
 import { useNavigate } from "react-router-dom";
 import { UserActions } from "../../constants/userActions";
 import LoadingModal from "../Loading";
+import { useEffect, useState } from "react";
 
 const UsersTable = () => {
   const { users, refetch, isLoading } = useUsers();
   const userDetailsRoute = PATHS.USER_DETAILS;
   const navigate = useNavigate();
-  const deleteUser = useDeleteUser();
+  const { deleteUser, deleteMessage, isDeleting } = useDeleteUser();
+  const [loading, setLoading] = useState<boolean>(false);
 
-  return isLoading ? (
-    <LoadingModal isLoading={isLoading} />
+  useEffect(() => {
+    isLoading || isDeleting ? setLoading(true) : setLoading(false);
+  }, [deleteMessage, isDeleting, isLoading]);
+
+  return loading ? (
+    <LoadingModal isLoading={loading} actionMessage={deleteMessage} />
   ) : (
     <>
       <div className="container mt-5">
@@ -56,7 +62,7 @@ const UsersTable = () => {
                         deleteUser(user.id!.toString()).then(() => refetch());
                       }}
                     >
-                      Eliminar
+                      Delete
                     </button>
                   </td>
                 </tr>
