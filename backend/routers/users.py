@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from models.user import UserUpdate, UserGet, UserCreate
 from core.cognito_service import *
 from utils.security import *
+from core.logger import logger
 
 security = HTTPBearer()
 router = APIRouter(prefix="/users", tags=["users"])
@@ -36,12 +37,10 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 
         update_user(user_id, user_data)
         updated_user = fetch_user_by_id(user_id)
-        print("Updated user:", updated_user)
+        logger.info("Updated user:", updated_user)
         return updated_user
-
     except HTTPException:
         raise
-
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -53,11 +52,11 @@ def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     try: 
         password = generate_random_password()
         cognito_response = create_cognito_user(role_id=user_data.role_id ,email=user_data.email, temp_password=password)
-        print("Cognito response:", cognito_response)
+        logger.info("Cognito response:", cognito_response)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))
     cognito_id = cognito_response.username
-    print("Cognito user created with ID:", cognito_id)
+    logger.info("Cognito user created with ID:", cognito_id)
     return create_user(user_data, cognito_id)
     
 @router.delete("/{user_id}", status_code=204)

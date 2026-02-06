@@ -6,6 +6,7 @@ from repositories.user_queries import *
 from fastapi import HTTPException
 import os
 from core.cognito_service import delete_cognito_user 
+from core.logger import logger
 
 USER_POOL_ID = os.getenv("USERPOOL_ID")
 
@@ -13,20 +14,18 @@ def delete_user_by_id(user_id: int):
     conn = get_connection()
     cur = None
     try: 
-        print("-----------  ------------")
         cur = conn.cursor()
-        print(f"Starting process to delete user with ID:{user_id}")
+        logger.info(f"Starting process to delete user with ID:{user_id}")
         query = DELETE_USER_QUERY
         cur.execute(query, (user_id,))
         conn.commit() 
-        print(f"User with ID deleted: {user_id}")
+        logger.info(f"User with ID deleted: {user_id}")
         return True
     except Exception as e:
-        print("Error deleting user:", e)
+        logger.error("Error deleting user:", e)
         translate_error(e)
     finally:
-        print("Closing connection after deleting user")
-        print("-----------  ------------")
+        logger.info("Closing connection after deleting user")
         cur.close()
         conn.close()
     
@@ -36,67 +35,65 @@ def update_user(user_id: int, user_data: UserUpdate):
     cur = None
     try:
         cur = conn.cursor()
-        print("Updating user with ID:", user_id)
+        logger.info("Updating user with ID:", user_id)
         query = UPDATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
                   user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
                   user_data.role_id, user_data.nationality, user_id)
-        print("Executing update with values:", values)
+        logger.info("Executing update with values:", values)
         cur.execute(query, values)
         conn.commit() 
         return True
     except Exception as e:  
-        print("Error updating user:", e)
+        logger.error("Error updating user:", e)
         translate_error(e)
     finally:
-        print("Closing connection after updating user")
+        logger.info("Closing connection after updating user")
         cur.close()
         conn.close()
 
 def create_user(user_data: UserCreate, cognito_id: str):
     conn = get_connection()
     try:
-        print('Creating user with data:', user_data)
+        logger.info('Creating user with data:', user_data)
         cur = conn.cursor()
         query = CREATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id,
                   user_data.id_number, user_data.phone_number, user_data.email,
                   user_data.address, user_data.role_id, user_data.nationality, cognito_id)
         cur.execute(query, values)
-        print("Executed create user with values:", values)
+        logger.info("Executed create user with values:", values)
         new_id = cur.fetchone()[0]
         conn.commit()
-        print("User created with ID:", new_id)
+        logger.info("User created with ID:", new_id)
         return fetch_user_by_id(new_id)
     except Exception as e:
-        print("Error creating user:", e)
+        logger.error("Error creating user:", e)
         translate_error(e)
         delete_cognito_user(username=cognito_id)
         raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))
     finally:
-        print("Closing connection after creating user")
+        logger.error("Closing connection after creating user")
         cur.close()
         conn.close()
 
 def fetch_user_by_id(user_id: int):
     conn = get_connection()
     try: 
-        print("---------------")
-        print(f"Fetching user by ID:{user_id}")
+        logger.info(f"Fetching user by ID:{user_id}")
         cur = conn.cursor()
         query = FETCH_USER_BY_ID_QUERY
         cur.execute(query, (user_id,))
-        print("Executed query to fetch user by ID")
+        logger.info("Executed query to fetch user by ID")
         row = cur.fetchone()
         user = create_user_object(row)
-        print(f"Fetched user:{user}")
-        print("---------------")
+        logger.info(f"Fetched user:{user}")
         return user
     except Exception as e:
-        print(f"Error fetching user by ID: {e}")
+        logger.error(f"Error fetching user by ID: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while fetching the user: {str(e)}")
     finally:
-        print("Closing connection after fetching user by ID")
+        logger.info("Closing connection after fetching user by ID")
         cur.close()
         conn.close()
 
@@ -106,13 +103,12 @@ def fetch_users():
         cur = conn.cursor()
         query = FETCH_USERS_QUERY
         cur.execute(query)
-        print("Executed query to fetch users")
+        logger.info("Executed query to fetch users")
         rows = cur.fetchall()
         users = []
         for row in rows:
             user = create_user_object(row)
             users.append(user)
-        print(users)
         return users
     finally:
         cur.close()
@@ -128,11 +124,11 @@ def email_or_id_exists(conn, email: str, id_number: str) -> bool:
 
 def create_user_object(row) -> UserGet:
     role = Role(id=row[8], name=row[9], description=row[10])
-    print("Role created:", role)
+    logger.info("Role created:", role)
     identification_type = IdentificationType(
         id=row[11], name=row[12], description=row[13]
     )
-    print("Identification Type created:", identification_type)
+    logger.info("Identification Type created:", identification_type)
     user = UserGet(
         id=row[0],
         first_name=row[1],
@@ -146,15 +142,15 @@ def create_user_object(row) -> UserGet:
         identification_type=identification_type,
         cognito_id=row[14]
     )
-    print("User created:", user)
+    logger.info("User created id:", user.id)
     return user
 
 def translate_error(e: Exception):
     if "users_id_number_key" in str(e):
-        print("ID number already exists error detected")
+        logger.error("ID number already exists error detected")
         raise HTTPException(status_code=400, detail="ID number already exists for other user")
     if "users_email_key" in str(e):
-        print("Email already exists error detected")
+        logger.error("Email already exists error detected")
         raise HTTPException(status_code=400, detail="Email already exists for other user")
     raise HTTPException(status_code=400, detail=e)
     

@@ -36,9 +36,6 @@ def verify_token(token: str):
             audience=APP_CLIENT_ID,
             issuer=ISSUER
         )
-        print("-------------")
-        print("Token payload:", payload)
-        print("-------------")
         return payload
 
     except Exception as e:
@@ -47,9 +44,6 @@ def verify_token(token: str):
 
 def get_current_user(credentials=Depends(security)):
     token = credentials.credentials
-    print("-------------")
-    print("Credentials received:", credentials)
-    print("-------------")
     try:
         payload = verify_token(token)
         return payload
