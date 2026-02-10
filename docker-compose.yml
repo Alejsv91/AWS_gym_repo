@@ -25,6 +25,8 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION}
+      - LOG_GROUP=my-backend-logs
+      - LOG_STREAM=fastapi
       - COGNITO_REGION=${COGNITO_REGION}
       - USERPOOL_ID=${USERPOOL_ID}
     

@@ -16,37 +16,50 @@ import { AxiosError } from "axios";
 
 export function useDeleteUser() {
   const api = useApi();
-
+  const [deleteMessage, setDeleteMessage] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const deleteUser = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      const result = await api.delete(USER_ENDPOINT.deleteUser(id));
-      if (result.status !== 204) {
-        console.error("Failed to delete user:", result.status, result.data);
-        alert("Failed to delete user.");
-        return false;
+    try{
+      if (window.confirm("Are you sure you want to delete this user?")) {
+        setIsDeleting(true);
+        setDeleteMessage("Deleting user, please wait...");
+        const result = await api.delete(USER_ENDPOINT.deleteUser(id));
+        if (result.status !== 204) {
+          console.error("Failed to delete user:", result.status, result.data);
+          alert("Failed to delete user.");
+          return false;
+        }
+        console.log("Delete user result:", result);
+        setIsDeleting(false);
+        setDeleteMessage("User deleted successfully!");
+        alert("User deleted successfully!");
+        return result;
       }
-      console.log("Delete user result:", result);
-      alert("User deleted successfully!");
-      return result;
+      return false;
     }
-    return false;
+    catch(error: AxiosError | any){
+      getErrorMessage(error);
+    }    
   };
-  return deleteUser;
+  return {deleteUser, deleteMessage, isDeleting };
 }
 
 export function useUsers() {
   const api = useApi();
   const [users, setUsers] = useState<UserResponse[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchUsers = async () => {
+    setIsLoading(true);
     const { data } = await api.get(USER_ENDPOINT.getUsers);
     const mappedUsers = data.map(mapUser);
     setUsers(mappedUsers);
+    setIsLoading(false);
   };
   useEffect(() => {
     fetchUsers();
   }, []);
-  return { users, refetch: fetchUsers };
+  return { users, refetch: fetchUsers, isLoading };
 }
 
 export function useFetchUserById(id: string) {
@@ -72,8 +85,12 @@ export function useUpdateUser(
   userData: Partial<UserUpdateRequest>
 ) {
   const api = useApi();
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [updateMessage, setUpdateMessage] = useState<string>("");
   const updateUser = async () => {
     try {
+      setIsUpdating(true);
+      setUpdateMessage("Updating user, please wait...");
       const response = await api.put(
         USER_ENDPOINT.updateUser(id),
         toUserUpdateRequest(userData as UserResponse)
@@ -82,6 +99,8 @@ export function useUpdateUser(
         console.error("Failed to update user:", response.status, response.data);
         throw new Error(`Update failed with status ${response.status}`);
       }
+      setIsUpdating(false);
+      setUpdateMessage("User udpated successfully!");
       alert("Changes saved!");
       return true;
     } catch (error: AxiosError | any) {
@@ -89,13 +108,17 @@ export function useUpdateUser(
     }
   };
   console.log("useUpdateUser called with:", id, userData);
-  return updateUser;
+  return {updateUser, isUpdating, updateMessage };
 }
 
 export function useCreateUser(userData: Partial<UserCreateRequest>) {
+  const [isCreatingUser, setIsCreatignUser] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
   const api = useApi();
   const createUser = async () => {
     try {
+      setIsCreatignUser(true);
+      setLoadingMessage("Creating user, please wait...");
       const response = await api.post(
         USER_ENDPOINT.createUser,
         toCreateUserRequest(userData as UserCreate)
@@ -105,12 +128,14 @@ export function useCreateUser(userData: Partial<UserCreateRequest>) {
         throw new Error(`Creation failed with status ${response.status}`);
       }
       alert("User created successfully!");
-      return true;
+      setIsCreatignUser(false);
+      setLoadingMessage(`User ${response.data.username} created successfully!`);
     } catch (error: AxiosError | any) {
+      setIsCreatignUser(false);
       getErrorMessage(error);
     }
   };
-  return createUser;
+  return { createUser, isCreatingUser, loadingMessage };
 }
 
 function getErrorMessage(error: AxiosError | any) {

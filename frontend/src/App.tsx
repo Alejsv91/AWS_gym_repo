@@ -1,23 +1,25 @@
 // App.js
 import { useAuth } from "react-oidc-context";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPages";
 import Navbar from "./components/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ROUTES } from "./constants/Routes";
 import { useAuthActions } from "./utils/auth";
+import LoadingModal from "./components/Loading";
+import { useState, useEffect } from "react";
 
 function App() {
   const auth = useAuth();
   const { login } = useAuthActions();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(auth.isLoading);
+  }, [auth.isLoading]);
 
   if (auth.isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingModal isLoading={isLoading} />;
   }
 
   if (auth.error) {
@@ -33,8 +35,12 @@ function App() {
             <Route path="/landing" element={<LandingPage />} />
             {/* Redirect to landing page after login */}
             <Route path="*" element={<Navigate to="/landing" />} />
-            {ROUTES.map(route => (
-              <Route key={route.path} path={route.path} element={route.element} />
+            {ROUTES.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
             ))}
           </>
         ) : (
@@ -43,10 +49,7 @@ function App() {
             element={
               <div className="container mt-5">
                 <h1>Please log in</h1>
-                <button
-                  className="btn btn-primary"
-                  onClick={login}
-                >
+                <button className="btn btn-primary" onClick={login}>
                   Login
                 </button>
               </div>

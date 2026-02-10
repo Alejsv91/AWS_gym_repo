@@ -13,7 +13,7 @@ import {
 } from "../../services/identificationType";
 import { useFetchUserById } from "../../services/userService";
 import { UserActions } from "../../constants/userActions";
-import { isEditable, isVisible } from "@testing-library/user-event/dist/utils";
+import LoadingModal from "../Loading";
 
 interface FormUsersProps {
   userId?: string;
@@ -25,17 +25,42 @@ export default function FormUser(formUserProps: FormUsersProps) {
   const userInfo = useFetchUserById(id!);
   const [showModal, setShowModal] = useState(false);
   const rawNationalities = useFetchNationalities() || [];
-  const roles = useRoles() || [];
+  const { roles } = useRoles() || [];
   const idTypes = useFetchIdentificationTypes() || [];
   const nationalities = rawNationalities.map((n) => mapDropdownOption(n, n));
   const loading =
     nationalities.length === 0 || roles.length === 0 || idTypes.length === 0;
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-  const updateUser = useUpdateUser(id!, userDetails!);
-  const createUser = useCreateUser(userDetails!);
+  const { updateUser, isUpdating, updateMessage } = useUpdateUser(
+    id!,
+    userDetails!
+  );
+  const { createUser, isCreatingUser, loadingMessage } = useCreateUser(
+    userDetails!
+  );
   const USER_ACTIONS = UserActions;
   const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [actionMessage, setActionMessage] = useState("");
+
+  useEffect(() => {
+    if (isCreatingUser) {
+      setActionMessage(loadingMessage);
+      return;
+    } else if (isUpdating) {
+      setActionMessage(updateMessage);
+      return;
+    }
+  }, [loadingMessage, updateMessage]);
+
+  useEffect(() => {
+    if (isCreatingUser || loading || isUpdating) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [isCreatingUser, loading, isUpdating]);
 
   useEffect(() => {
     if (userInfo) {
@@ -94,7 +119,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Last Name",
@@ -104,7 +129,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateAlphabeticInput,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Identification Number",
@@ -114,7 +139,7 @@ export default function FormUser(formUserProps: FormUsersProps) {
       updateFunction: updateInputValue,
       validationFunction: validateIdNumber,
       isEditable: true,
-      isVisible : true,
+      isVisible: true,
     },
     {
       label: "Phone Number",
@@ -252,11 +277,10 @@ export default function FormUser(formUserProps: FormUsersProps) {
 
     setShowModal(false); // close modal after saving
   };
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
-  return (
+  return isLoading ? (
+    LoadingModal({ isLoading, actionMessage })
+  ) : (
     <div className="container mt-4">
       <h2>User Details</h2>
       <form className="border p-3 rounded bg-light">
@@ -278,27 +302,31 @@ export default function FormUser(formUserProps: FormUsersProps) {
             </select>
           </div>
         ))}
-        {inputs.map((input, index) => input?.isVisible ? (
-          <div className="mb-3" key={index}>
-            <label className="form-label">{input.label}</label>
-            <input
-              id={input.id}
-              type={input.type}
-              disabled={input.isEditable === false}
-              className={`form-control ${errors[input.id] ? "is-invalid" : ""}`}
-              value={input.value}
-              onChange={
-                input.updateFunction
-                  ? (e) =>
-                      input.updateFunction(e, input.id as keyof UserResponse)
-                  : undefined
-              }
-            />
-            {errors[input.id] && (
-              <div className="invalid-feedback">{errors[input.id]}</div>
-            )}
-          </div>
-        ): null)}
+        {inputs.map((input, index) =>
+          input?.isVisible ? (
+            <div className="mb-3" key={index}>
+              <label className="form-label">{input.label}</label>
+              <input
+                id={input.id}
+                type={input.type}
+                disabled={input.isEditable === false}
+                className={`form-control ${
+                  errors[input.id] ? "is-invalid" : ""
+                }`}
+                value={input.value}
+                onChange={
+                  input.updateFunction
+                    ? (e) =>
+                        input.updateFunction(e, input.id as keyof UserResponse)
+                    : undefined
+                }
+              />
+              {errors[input.id] && (
+                <div className="invalid-feedback">{errors[input.id]}</div>
+              )}
+            </div>
+          ) : null
+        )}
         <div className="mb-3">
           <button
             type="button"
