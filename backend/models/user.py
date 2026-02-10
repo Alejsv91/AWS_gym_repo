@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from models.role import Role
+from models.role import RoleGet
 from models.identification_type import IdentificationType
 
 class UserBase(BaseModel):
@@ -21,6 +21,6 @@ class UserUpdate(UserBase):
     
 class UserGet(UserBase):
     id: int
-    role: Role
+    role: RoleGet
     identification_type: IdentificationType
     cognito_id: str

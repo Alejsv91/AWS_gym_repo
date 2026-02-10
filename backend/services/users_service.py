@@ -1,12 +1,13 @@
 from core.db import get_connection
 from models.user import UserGet, UserUpdate, UserCreate
-from models.role import Role
+from models.role import RoleGet
 from models.identification_type import IdentificationType
 from repositories.user_queries import *
 from fastapi import HTTPException
 import os
 from core.cognito_service import delete_cognito_user 
 from core.logger import logger
+import traceback
 
 USER_POOL_ID = os.getenv("USERPOOL_ID")
 
@@ -22,7 +23,7 @@ def delete_user_by_id(user_id: int):
         logger.info(f"User with ID deleted: {user_id}")
         return True
     except Exception as e:
-        logger.error("Error deleting user:", e)
+        logger.error(f"Error deleting user: \n{traceback.format_exc()}")
         translate_error(e)
     finally:
         logger.info("Closing connection after deleting user")
@@ -35,17 +36,17 @@ def update_user(user_id: int, user_data: UserUpdate):
     cur = None
     try:
         cur = conn.cursor()
-        logger.info("Updating user with ID:", user_id)
+        logger.info(f"Updating user with ID: {user_id}")
         query = UPDATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id, 
                   user_data.id_number, user_data.phone_number, user_data.email, user_data.address, 
                   user_data.role_id, user_data.nationality, user_id)
-        logger.info("Executing update with values:", values)
+        logger.info("Executing update")
         cur.execute(query, values)
         conn.commit() 
         return True
     except Exception as e:  
-        logger.error("Error updating user:", e)
+        logger.error(f"Error updating user: \n{traceback.format_exc()}")
         translate_error(e)
     finally:
         logger.info("Closing connection after updating user")
@@ -54,26 +55,26 @@ def update_user(user_id: int, user_data: UserUpdate):
 
 def create_user(user_data: UserCreate, cognito_id: str):
     conn = get_connection()
+    cur = conn.cursor()
     try:
-        logger.info('Creating user with data:', user_data)
-        cur = conn.cursor()
+        logger.info('Creating user')
         query = CREATE_USER_QUERY
         values = (user_data.first_name, user_data.last_name, user_data.identification_type_id,
                   user_data.id_number, user_data.phone_number, user_data.email,
                   user_data.address, user_data.role_id, user_data.nationality, cognito_id)
         cur.execute(query, values)
-        logger.info("Executed create user with values:", values)
+        logger.info("Executed create user query")
         new_id = cur.fetchone()[0]
         conn.commit()
-        logger.info("User created with ID:", new_id)
+        logger.info(f"User created with ID: {new_id}")
         return fetch_user_by_id(new_id)
     except Exception as e:
-        logger.error("Error creating user:", e)
+        logger.error(f"Error creating user: \n{traceback.format_exc()}")
         translate_error(e)
         delete_cognito_user(username=cognito_id)
         raise HTTPException(status_code=500, detail="An error occurred while creating the user: " + str(e))
     finally:
-        logger.error("Closing connection after creating user")
+        logger.info("Closing connection after creating user")
         cur.close()
         conn.close()
 
@@ -127,12 +128,12 @@ def email_or_id_exists(conn, email: str, id_number: str) -> bool:
     return count > 0
 
 def create_user_object(row) -> UserGet:
-    role = Role(id=row[8], name=row[9], description=row[10])
-    logger.info(f"Role created:{role.name}")
+    role = RoleGet(id=row[8], name=row[9], description=row[10])
+    logger.debug(f"Role created:{role.name}")
     identification_type = IdentificationType(
         id=row[11], name=row[12], description=row[13]
     )
-    logger.info(f"Identification Type created: {identification_type.name}")
+    logger.debug(f"Identification Type created: {identification_type.name}")
     user = UserGet(
         id=row[0],
         first_name=row[1],
@@ -146,7 +147,7 @@ def create_user_object(row) -> UserGet:
         identification_type=identification_type,
         cognito_id=row[14]
     )
-    logger.info(f"User created id: {user.id}")
+    logger.debug(f"User created id: {user.id}")
     return user
 
 def translate_error(e: Exception):
