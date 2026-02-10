@@ -100,14 +100,18 @@ def fetch_user_by_id(user_id: int):
 def fetch_users():
     conn = get_connection()
     try:
+        logger.debug("-----Fetching all users-----")
         cur = conn.cursor()
         query = FETCH_USERS_QUERY
         cur.execute(query)
         logger.info("Executed query to fetch users")
         rows = cur.fetchall()
         users = []
+        logger.debug(f"Database response: {rows}")
         for row in rows:
+            logger.debug(f"Processing row: {row}")
             user = create_user_object(row)
+            logger.debug(f"Created user object: {user.id}")
             users.append(user)
         return users
     finally:
@@ -124,11 +128,11 @@ def email_or_id_exists(conn, email: str, id_number: str) -> bool:
 
 def create_user_object(row) -> UserGet:
     role = Role(id=row[8], name=row[9], description=row[10])
-    logger.info("Role created:", role)
+    logger.info(f"Role created:{role.name}")
     identification_type = IdentificationType(
         id=row[11], name=row[12], description=row[13]
     )
-    logger.info("Identification Type created:", identification_type)
+    logger.info(f"Identification Type created: {identification_type.name}")
     user = UserGet(
         id=row[0],
         first_name=row[1],
@@ -142,7 +146,7 @@ def create_user_object(row) -> UserGet:
         identification_type=identification_type,
         cognito_id=row[14]
     )
-    logger.info("User created id:", user.id)
+    logger.info(f"User created id: {user.id}")
     return user
 
 def translate_error(e: Exception):

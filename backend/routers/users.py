@@ -7,6 +7,7 @@ from models.user import UserUpdate, UserGet, UserCreate
 from core.cognito_service import *
 from utils.security import *
 from core.logger import logger
+import traceback
 
 security = HTTPBearer()
 router = APIRouter(prefix="/users", tags=["users"])
@@ -16,14 +17,16 @@ def get_users(user=Depends(get_current_user)):
     try: 
         return fetch_users()
     except Exception as e:
-        return {"error": str(e)}
+        logger.error(f"Error fetching users:\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="An error occurred while fetching users: " + str(e))
     
 @router.get("/{user_id}", response_model=UserGet, status_code=200)
 def get_user_by_id(user_id: int, user=Depends(get_current_user)):
     try:
         return fetch_user_by_id(user_id)
     except Exception as e:
-        return {"error": str(e)}
+        logger.error(f"Error fetching user by ID {user_id}: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred while fetching the user: " + str(e))
 
 @router.put("/{user_id}", response_model=UserGet, status_code=200)
 def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_current_user)):
@@ -37,11 +40,10 @@ def update_user_by_id(user_id: int, user_data: UserUpdate, user=Depends(get_curr
 
         update_user(user_id, user_data)
         updated_user = fetch_user_by_id(user_id)
-        logger.info("Updated user:", updated_user)
+        logger.info(f"Updated user: {updated_user}")
         return updated_user
-    except HTTPException:
-        raise
     except Exception as e:
+        logger.error(f"Error updating user with ID {user_id}: {e}")
         raise HTTPException(
             status_code=500,
             detail="An error occurred while updating the user: " + str(e)
@@ -52,11 +54,12 @@ def create_new_user(user_data: UserCreate, user=Depends(get_current_user)):
     try: 
         password = generate_random_password()
         cognito_response = create_cognito_user(role_id=user_data.role_id ,email=user_data.email, temp_password=password)
-        logger.info("Cognito response:", cognito_response)
+        logger.info(f"Cognito response: {cognito_response}")
     except Exception as e:
+        logger.error(f"Error creating Cognito user: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while creating the Cognito user: " + str(e))
     cognito_id = cognito_response.username
-    logger.info("Cognito user created with ID:", cognito_id)
+    logger.info(f"Cognito user created with ID: {cognito_id}")
     return create_user(user_data, cognito_id)
     
 @router.delete("/{user_id}", status_code=204)
@@ -73,4 +76,5 @@ def delete_user(user_id: int, user=Depends(get_current_user)):
         delete_user_by_id(user_id)
         return {"message": f"User {currentUser.first_name} deleted successfully"}
     except Exception as e:
+        logger.error(f"Error deleting user with ID {user_id}: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while deleting the user: " + str(e))

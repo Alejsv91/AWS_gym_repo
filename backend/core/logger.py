@@ -17,7 +17,7 @@ boto3_client = boto3.client(
 )
 
 logger = logging.getLogger("myapp")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 cloudwatch_handler = watchtower.CloudWatchLogHandler(
     boto3_client=boto3_client,
