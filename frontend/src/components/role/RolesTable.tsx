@@ -1,5 +1,7 @@
 import { useRoles } from "../../services/roleService";
 import LoadingModal from "../Loading";
+import { Link } from "react-router-dom";
+import { PATHS } from "../../constants/paths";
 
 const RolesTable: React.FC = () => {
   const { roles, isLoading } = useRoles();
@@ -24,9 +26,12 @@ const RolesTable: React.FC = () => {
                 <td className="fw-bold">{role.name}</td>
                 <td>{role.description}</td>
                 <td>
-                  <button className="btn btn-sm btn-outline-success me-2">
-                    Editar
-                  </button>
+                  <Link
+                    to={`${PATHS.ROLES_DETAILS}${role.id}`}
+                    className="btn btn-sm btn-outline-success me-2"
+                  >
+                    Edit
+                  </Link>
                   <button className="btn btn-sm btn-outline-danger">
                     Eliminar
                   </button>
