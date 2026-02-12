@@ -1,7 +1,26 @@
 from core.db import get_connection
 from models.role import RoleGet, RoleCreate
 from repositories.role_queries import *
+from core.logger import logger
+import traceback
 
+def fetch_role_by_id(role_id: int):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        logger.debug(f"Fetching role with ID: {role_id}")
+        cur.execute(SELECT_ROLE_BY_ID_QUERY, (role_id,))
+        row = cur.fetchone()
+        if row:
+            logger.debug(f"Role found: {row}")
+            return create_role_object(row)
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Error getting role: \n{traceback.format_exc()}")
+    finally:
+        cur.close()
+        conn.close()
 
 def create_role(role_data: RoleCreate):
     conn = get_connection()

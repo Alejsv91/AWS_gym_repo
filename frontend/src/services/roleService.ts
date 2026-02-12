@@ -21,3 +21,21 @@ export function useRoles() {
 
   return {roles, isLoading};
 }
+
+export function useGetRoleById(id: string) {
+  const api = useApi();
+  const [role, setRole] = useState<Role | null>(null);
+  const [isRoleLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchRole = async () => {
+      const { data } = await api.get(ROLE_ENDPOINTS.getRoleById(id));
+      setRole(data);
+      setIsLoading(false);
+    };
+    fetchRole();
+  }, [id]);
+
+  return { role, isRoleLoading };
+}

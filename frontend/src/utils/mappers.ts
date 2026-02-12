@@ -1,4 +1,5 @@
-import { UserCreatePayload, UserResponse, UserCreate, UserUpdatePayload } from "../interfaces/users";
+import { UserCreatePayload, UserResponse, UserUpdatePayload } from "../interfaces/users";
+
 
 export function mapUser(apiUser: any): UserResponse {
   return {
@@ -57,3 +58,5 @@ export function toCreateUserRequest(user: UserResponse): UserCreatePayload {
     nationality: user.nationality,
   }
 }
+
+

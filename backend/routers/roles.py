@@ -4,10 +4,26 @@ from core.auth import get_current_user
 from services.roles_service import *
 from models.role import RoleCreate
 from core.logger import logger
+import traceback
 
 security = HTTPBearer()
 
 router = APIRouter(prefix="/roles", tags=["roles"])
+
+@router.get("/{role_id}", response_model=RoleGet, status_code=200)
+def get_role_by_id(role_id:str, user=Depends(get_current_user)):
+    try: 
+        logger.info(f"User {user['username']} is fetching role with ID: {role_id}")
+        role = fetch_role_by_id(role_id)
+        if role:
+            logger.info(f"Role fetched successfully: {role}")
+            return role
+        else:
+            logger.warning(f"Role with ID {role_id} not found")
+            return {"error": "Role not found"}
+    except Exception as e:
+        logger.error(logger.error(f"Error fetching role:\n{traceback.format_exc()}"))
+        return {"error": str(e)}
 
 @router.get("/")
 def get_roles(user=Depends(get_current_user)):

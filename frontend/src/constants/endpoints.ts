@@ -1,6 +1,6 @@
 const GYMS = '/gyms';
 const USERS = '/users';
-const ROLES = '/roles/';
+const ROLES = '/roles';
 const IDENTIFICATION_TYPES = '/identification-types';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -9,7 +9,8 @@ export const GYM_ENDPOINTS = {
 };
 
 export const ROLE_ENDPOINTS = {
-    getRoles: `${ROLES}`
+    getRoles: `${ROLES}`,
+    getRoleById: (id: string) => `${ROLES}/${id}`,
 }
 
 export const USER_ENDPOINT = {
