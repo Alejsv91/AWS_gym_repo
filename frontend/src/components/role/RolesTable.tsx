@@ -2,9 +2,11 @@ import { useRoles } from "../../services/roleService";
 import LoadingModal from "../Loading";
 import { Link } from "react-router-dom";
 import { PATHS } from "../../constants/paths";
+import { UserActions } from "../../constants/userActions";
 
 const RolesTable: React.FC = () => {
   const { roles, isLoading } = useRoles();
+  const userActions = UserActions;
 
   return isLoading ? (
     <LoadingModal isLoading />
@@ -29,6 +31,7 @@ const RolesTable: React.FC = () => {
                   <Link
                     to={`${PATHS.ROLES_DETAILS}${role.id}`}
                     className="btn btn-sm btn-outline-success me-2"
+                    state={{ userAction: userActions.EDIT }}
                   >
                     Edit
                   </Link>

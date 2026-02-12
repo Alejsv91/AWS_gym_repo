@@ -26,6 +26,7 @@ export function useGetRoleById(id: string) {
   const api = useApi();
   const [role, setRole] = useState<Role | null>(null);
   const [isRoleLoading, setIsLoading] = useState<boolean>(true);
+  const [loadingRoleMessage, setLoadingMessage] = useState<string>("Loading role details...");
 
   useEffect(() => {
     setIsLoading(true);
@@ -37,5 +38,5 @@ export function useGetRoleById(id: string) {
     fetchRole();
   }, [id]);
 
-  return { role, isRoleLoading };
+  return { role, isRoleLoading, loadingRoleMessage };
 }
