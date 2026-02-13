@@ -1,10 +1,16 @@
 export interface InputElement {
   label: string;
-  value: string | string;
+  value: string | number;
   type: string;
   id: string;
-  updateFunction: () => void;
-  validationFunction: () => boolean;
-  isEditable: boolean;
-  isVisible: boolean;
+
+  updateFunction?: (e: React.ChangeEvent<HTMLInputElement>, id: string) => void;
+
+  validationFunction?: (value: string | number) => void;
+
+  isEditable?: boolean;
+  isVisible?: boolean;
+
+  error?: boolean;
+  errorMessage?: string;
 }
