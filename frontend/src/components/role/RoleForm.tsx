@@ -64,11 +64,22 @@ export default function RoleForm() {
         <h2>User Details</h2>
         <form className="border p-3 rounded bg-light">
           {inputs.map((inputElement, index) => (
-            <Input
-            inputElement = {inputElement}
-            index={index}
-            />
+            <Input inputElement={inputElement} index={index} />
           ))}
+          <div className="mb-3">
+            <tr>
+              <td>
+                <button type="submit" className="btn btn-primary">
+                  {userAction === UserActions.CREATE
+                    ? "Create Role"
+                    : "Update Role"}
+                </button>
+              </td>
+              <td>
+                <button className="btn btn-primary btn-danger">Cancel</button>
+              </td>
+            </tr>
+          </div>
         </form>
       </div>
     </>

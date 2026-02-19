@@ -36,7 +36,7 @@ const RolesTable: React.FC = () => {
                     Edit
                   </Link>
                   <button className="btn btn-sm btn-outline-danger">
-                    Eliminar
+                    Delete
                   </button>
                 </td>
               </tr>
