@@ -2,7 +2,43 @@ from core.db import get_connection
 from models.role import RoleGet, RoleCreate
 from repositories.role_queries import *
 from core.logger import logger
+from fastapi import HTTPException
 import traceback
+
+def fetch_permissions_by_role_id(role_id: int):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        logger.debug(f"Fetching permissions for role ID: {role_id}")
+        query = SELECT_PERMISSIONS_BY_ROLE_ID_QUERY
+        cur.execute(query, (role_id,))
+        rows = cur.fetchall()
+        permissions = [row[0] for row in rows]
+        logger.debug(f"Permissions found: {permissions}")
+        return permissions
+    except Exception as e:
+        logger.error(f"Error fetching permissions:\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="Error fetching permissions")
+    finally:
+        cur.close()
+        conn.close()
+
+def update_role_by_id(role_id: int, role_data: RoleCreate):
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        logger.debug(f"Updating role with ID: {role_id} using data: {role_data}")
+        query = UPDATE_ROLE_QUERY
+        cur.execute(query, 
+                    (role_data.name, role_data.description, role_id))
+        conn.commit()
+    except Exception as e:
+        logger.error(f"Error updating role:\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="Error updating role")
+    finally:
+        cur.close()
+        conn.close()    
+    return (fetch_role_by_id(role_id))
 
 def fetch_role_by_id(role_id: int):
     conn = get_connection()
@@ -22,7 +58,7 @@ def fetch_role_by_id(role_id: int):
         cur.close()
         conn.close()
 
-def create_role(role_data: RoleCreate):
+def create_role_service(role_data: RoleCreate):
     conn = get_connection()
     try: 
         cur = conn.cursor()
