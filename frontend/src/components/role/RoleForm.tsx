@@ -6,6 +6,7 @@ import { UserActions } from "../../constants/userActions";
 import { useLocation } from "react-router-dom";
 import { InputElement } from "../../interfaces/inputElement";
 import Input from "../shared/Input";
+import PermissionsTable from "../permissions/permissionTable";
 
 export interface RoleFormProps {
   userAction: UserActions;
@@ -56,12 +57,8 @@ export default function RoleForm() {
     LoadingModal({ isLoading, actionMessage })
   ) : (
     <>
-      <div>
-        RoleForm {id} and role name is {role?.name}
-        And the action is {userAction}
-      </div>
-      <div className="container mt-4">
-        <h2>User Details</h2>
+      <div className="container mt-4 mb-4">
+        <h2 className="mb-4">Role Details</h2>
         <form className="border p-3 rounded bg-light">
           {inputs.map((inputElement, index) => (
             <Input inputElement={inputElement} index={index} />
@@ -81,6 +78,10 @@ export default function RoleForm() {
             </tr>
           </div>
         </form>
+        <div></div>
+        <div className="mt-4">
+          <PermissionsTable />
+        </div>
       </div>
     </>
   );

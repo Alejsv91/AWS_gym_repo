@@ -68,4 +68,4 @@ def get_permissions_by_role_id(role_id:str, user=Depends(get_current_user)):
         return permissions
     except Exception as e:
         logger.error(f"Error fetching permissions for role ID {role_id}:\n{traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail="Error fetching permissions")
+        raise HTTPException(status_code=500, detail=f"Error fetching permissions for role ID {role_id}:\n{traceback.format_exc()}")

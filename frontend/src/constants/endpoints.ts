@@ -1,8 +1,14 @@
+const PERMISSIONS = '/permissions';
 const GYMS = '/gyms';
 const USERS = '/users';
 const ROLES = '/roles';
 const IDENTIFICATION_TYPES = '/identification-types';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+export const PERMISSION_ENDPOINTS = {
+    getPermissions: `${PERMISSIONS}`,
+    getPermissionsByRoleId: (roleId: string) => `/${roleId}${PERMISSIONS}`
+}
 
 export const GYM_ENDPOINTS = {
     getGyms: `${API_BASE_URL}${GYMS}`

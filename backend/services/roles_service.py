@@ -3,6 +3,8 @@ from models.role import RoleGet, RoleCreate
 from repositories.role_queries import *
 from core.logger import logger
 from fastapi import HTTPException
+from models.permission import PermissionGet
+from models.section import SectionGet
 import traceback
 
 def fetch_permissions_by_role_id(role_id: int):
@@ -13,7 +15,11 @@ def fetch_permissions_by_role_id(role_id: int):
         query = SELECT_PERMISSIONS_BY_ROLE_ID_QUERY
         cur.execute(query, (role_id,))
         rows = cur.fetchall()
-        permissions = [row[0] for row in rows]
+        # logger.log(f"Permissions query executed successfully, rows fetched: {len(rows)}")
+        permissions = []
+        for row in rows:
+            permission= create_permissions_object(row)
+            permissions.append(permission)
         logger.debug(f"Permissions found: {permissions}")
         return permissions
     except Exception as e:
@@ -70,6 +76,28 @@ def create_role_service(role_data: RoleCreate):
     finally:
         cur.close()
         conn.close()
+
+def create_permissions_object(row) -> PermissionGet:
+    logger.debug(f"Creating permission object from row: {row}")
+    logger.debug(f"Adding Section")
+    section= SectionGet(
+            id=row[2],
+            name=row[3],
+            description=row[4]
+    )
+    # section.id = row[2]
+    # section.name = row[3]
+    # section.description = row[4]
+    logger.debug(f"Section object created: {section}")
+    logger.debug(f"Creating Permission object")
+    permission = PermissionGet(
+        id=row[0],
+        action=row[1],
+        section=section
+    )
+    logger.debug(f"Permission object created: {permission}")
+    return permission
+    
 
 def fetch_roles():
     conn = get_connection()

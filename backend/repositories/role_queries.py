@@ -20,9 +20,8 @@ WHERE id=%s;
 """
 
 SELECT_PERMISSIONS_BY_ROLE_ID_QUERY = """
-SELECT *
+SELECT permissions.id, permissions."action", sections.id, sections."name", sections.description
 FROM role_permissions
--- JOIN roles ON role_permissions.role_id = roles.id
 JOIN permissions ON role_permissions.permission_id = permissions.id
 JOIN sections ON sections.id = permissions.section_id
 WHERE role_id=%s;
